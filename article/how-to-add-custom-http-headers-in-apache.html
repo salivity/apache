@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Add Custom HTTP Headers in Apache? - apache</title>
+    <meta name="description" content="This guide provides a straightforward walkthrough on how to add custom HTTP response headers in the Apache web server. Managing custom headers is essential for enhancing security, controlling browser caching, and passing necessary metadata to clients. Yo">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-add-custom-http-headers-in-apache">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Add Custom HTTP Headers in Apache? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-add-custom-http-headers-in-apache" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a straightforward walkthrough on how to add custom HTTP response headers in the Apache web server. Managing custom headers is essential for enhancing security, controlling browser caching, and passing necessary metadata to clients. Yo" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-add-custom-http-headers-in-apache">How to Add Custom HTTP
+Headers in Apache?</h1>
+<p>This guide provides a straightforward walkthrough on how to add
+custom HTTP response headers in the Apache web server. Managing custom
+headers is essential for enhancing security, controlling browser
+caching, and passing necessary metadata to clients. You will learn the
+prerequisite module required, the basic syntax for the
+<code>Header</code> directive, and practical configuration examples for
+your server or <code>.htaccess</code> files.</p>
+<h2 id="prerequisites-enabling-mod_headers">Prerequisites: Enabling
+mod_headers</h2>
+<p>Before you can add custom headers, you must ensure that Apache’s
+<code>mod_headers</code> module is enabled. Without this module, any
+header manipulation directives will cause a server error.</p>
+<ul>
+<li><strong>On Ubuntu/Debian systems:</strong> Enable the module via the
+command line using <code>sudo a2enmod headers</code> and then restart
+Apache.</li>
+<li><strong>On CentOS/RHEL systems:</strong> This module is usually
+compiled and enabled by default in the <code>httpd.conf</code>
+file.</li>
+</ul>
+<h2 id="the-basic-syntax">The Basic Syntax</h2>
+<p>To manipulate HTTP headers, Apache utilizes the <code>Header</code>
+directive. The most common action for adding a new header is
+<code>set</code>, which replaces any existing header of the same name or
+creates a new one if it doesn’t exist.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Header<span class="st"> set HeaderName &quot;HeaderValue&quot;</span></span></code></pre></div>
+<ul>
+<li><strong>HeaderName:</strong> The name of the custom header you want
+to create (e.g., <code>X-Custom-Powered-By</code>).</li>
+<li><strong>HeaderValue:</strong> The value assigned to that header,
+enclosed in double quotes.</li>
+</ul>
+<h2 id="step-by-step-implementation">Step-by-Step Implementation</h2>
+<p>You can add custom headers either globally in the main server
+configuration file, within specific virtual hosts, or locally within a
+directory using an <code>.htaccess</code> file.</p>
+<h3 id="modifying-the-configuration-file">1. Modifying the Configuration
+File</h3>
+<p>Open your Apache configuration file (such as <code>httpd.conf</code>,
+<code>apache2.conf</code>, or your specific virtual host file located in
+<code>sites-available/</code>).</p>
+<h3 id="adding-the-directive">2. Adding the Directive</h3>
+<p>Place the <code>Header</code> directive inside the appropriate
+context. For example, to add a security header and a custom tracking
+header to a specific virtual host, your configuration block would look
+like this:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;VirtualHost</span><span class="at"> *:80</span><span class="fu">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ServerName<span class="st"> www.example.com</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    DocumentRoot<span class="st"> /var/www/html</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Custom response headers</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    Header<span class="st"> set X-Custom-Framework &quot;Enterprise-v1&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    Header<span class="st"> set X-Content-Type-Options &quot;nosniff&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/VirtualHost&gt;</span></span></code></pre></div>
+<h3 id="using-.htaccess-alternative-method">3. Using .htaccess
+(Alternative Method)</h3>
+<p>If you do not have access to the main server configuration files, you
+can add the rule to an <code>.htaccess</code> file in your website’s
+root directory:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;IfModule</span><span class="at"> mod_headers.c</span><span class="fu">&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Header<span class="st"> set X-Custom-Header &quot;MyValue&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/IfModule&gt;</span></span></code></pre></div>
+<p>Wrapping the directive in <code>&lt;IfModule&gt;</code> prevents your
+site from crashing if <code>mod_headers</code> is ever disabled.</p>
+<h2 id="testing-and-verifying-your-changes">Testing and Verifying Your
+Changes</h2>
+<p>After saving your configuration changes, always test the Apache
+configuration syntax for errors by running
+<code>apachectl configtest</code> or <code>apache2ctl -t</code>. If the
+syntax is valid, restart your Apache service to apply the updates.</p>
+<p>You can verify that your custom HTTP response header is active by
+using a command-line tool like cURL:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-I</span> http://localhost</span></code></pre></div>
+<p>The output will display the HTTP response headers, allowing you to
+confirm that your new custom header and its corresponding value are
+being successfully transmitted.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

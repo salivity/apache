@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Tune MaxRequestWorkers in Apache? - apache</title>
+    <meta name="description" content="Tuning the MaxRequestWorkers directive (formerly known as MaxClients) is critical for optimizing Apache HTTP Server performance, preventing server crashes, and managing memory usage under high traffic. This guide covers how to calculate the optimal value">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-tune-maxrequestworkers-in-apache">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Tune MaxRequestWorkers in Apache? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-tune-maxrequestworkers-in-apache" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Tuning the MaxRequestWorkers directive (formerly known as MaxClients) is critical for optimizing Apache HTTP Server performance, preventing server crashes, and managing memory usage under high traffic. This guide covers how to calculate the optimal value" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-tune-maxrequestworkers-in-apache">How to Tune
+MaxRequestWorkers in Apache?</h1>
+<p>Tuning the <code>MaxRequestWorkers</code> directive (formerly known
+as <code>MaxClients</code>) is critical for optimizing Apache HTTP
+Server performance, preventing server crashes, and managing memory usage
+under high traffic. This guide covers how to calculate the optimal value
+for your server based on available RAM, configure the directive within
+your Multi-Processing Module (MPM), and apply the changes safely.</p>
+<h3 id="understanding-maxrequestworkers">Understanding
+MaxRequestWorkers</h3>
+<p>The <code>MaxRequestWorkers</code> directive sets the limit on the
+number of simultaneous client requests that Apache will serve. Any
+connection attempts beyond this limit are queued up to the number
+defined by the <code>ListenBacklog</code> directive.</p>
+<ul>
+<li><strong>If the value is too low:</strong> Your server will
+underutilize its resources, and users may experience slow loading times
+or connection timeouts because they are stuck in the queue.</li>
+<li><strong>If the value is too high:</strong> Apache will attempt to
+handle more concurrent requests than the server’s physical memory (RAM)
+can support, leading to heavy use of swap space, severe performance
+degradation, or an Out-Of-Memory (OOM) crash.</li>
+</ul>
+<h3 id="step-1-calculate-your-servers-capacity">Step 1: Calculate Your
+Server’s Capacity</h3>
+<p>To find the right value, you need to know your total available RAM
+and the average memory size of a single Apache process.</p>
+<ol type="1">
+<li><strong>Find the average RAM used by an Apache process:</strong> You
+can run the following command in your terminal to see the average
+resident set size (RSS) of your Apache processes in megabytes:</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> <span class="at">-ylC</span> apache2 <span class="at">--sort:rss</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;{sum+=$8; ++n} END {print &quot;Avg: &quot;sum/n/1024&quot; MB&quot;}&#39;</span></span></code></pre></div>
+<p><em>(Note: Replace <code>apache2</code> with <code>httpd</code>
+depending on your Linux distribution, such as CentOS/RHEL).</em> 2.
+<strong>Determine available RAM for Apache:</strong> Deduct the memory
+required for your operating system and other services (like MySQL,
+PHP-FPM, or Redis) from your total RAM. If your server is a dedicated
+web server, you can safely allocate roughly 80% of the total RAM to
+Apache. 3. <strong>Use the Tuning Formula:</strong> Divide the available
+RAM by the average Apache process size: <span
+class="math display">\[MaxRequestWorkers = \frac{\text{Available RAM for
+Apache}}{\text{Average Apache Process Size}}\]</span></p>
+<p>For example, if you have 8 GB of total RAM, you might reserve 2 GB
+for the OS and other services, leaving 6 GB (6144 MB) for Apache. If
+your average Apache process size is 50 MB: <span
+class="math display">\[6144 \text{ MB} / 50 \text{ MB} =
+122.88\]</span></p>
+<p>In this scenario, you would round down and set your
+<code>MaxRequestWorkers</code> to <strong>120</strong>.</p>
+<h3 id="step-2-configure-the-directive-in-apache">Step 2: Configure the
+Directive in Apache</h3>
+<p>Apache handles concurrency via Multi-Processing Modules (MPMs),
+usually <strong>event</strong>, <strong>worker</strong>, or
+<strong>prefork</strong>. You must place the directive inside the
+configuration block for the specific MPM your server is running.</p>
+<ol type="1">
+<li>Open your Apache configuration file (commonly found at
+<code>/etc/apache2/mods-enabled/mpm_event.conf</code>,
+<code>/etc/apache2/apache2.conf</code>, or
+<code>/etc/httpd/conf.modules.d/00-mpm.conf</code>).</li>
+<li>Locate or add the directive inside your active MPM block.</li>
+</ol>
+<p>For the modern <strong>Event</strong> or <strong>Worker</strong>
+MPMs, you must also ensure that <code>ServerLimit</code> is configured
+properly, as <code>MaxRequestWorkers</code> cannot exceed
+<code>ServerLimit</code> divided by <code>ThreadsPerChild</code>.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;IfModule</span><span class="at"> mpm_event_module</span><span class="fu">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="ex">ServerLimit</span><span class="ch">           </span><span class="fl">16</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ch">    ThreadsPerChild       </span><span class="fl">25</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ch">    MaxRequestWorkers     </span><span class="fl">400</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ch">    MaxConnectionsPerChild </span><span class="fl">5000</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ch">&lt;/IfModule&gt;</span></span></code></pre></div>
+<p>For the legacy <strong>Prefork</strong> MPM (where one process
+handles one connection), the configuration is simpler:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;IfModule</span><span class="at"> mpm_prefork_module</span><span class="fu">&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="ex">ServerLimit</span><span class="ch">           </span><span class="fl">120</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ch">    MaxRequestWorkers     </span><span class="fl">120</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ch">    MaxConnectionsPerChild </span><span class="fl">3000</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ch">&lt;/IfModule&gt;</span></span></code></pre></div>
+<h3 id="step-3-test-and-restart-apache">Step 3: Test and Restart
+Apache</h3>
+<p>Before applying the new limits, always test your Apache configuration
+syntax to ensure there are no typos or structural errors.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apachectl</span> configtest</span></code></pre></div>
+<p><em>or</em></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">httpd</span> <span class="at">-t</span></span></code></pre></div>
+<p>If the output returns <code>Syntax OK</code>, restart the Apache
+service to apply the changes:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart apache2</span></code></pre></div>
+<p><em>or</em></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart httpd</span></code></pre></div></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

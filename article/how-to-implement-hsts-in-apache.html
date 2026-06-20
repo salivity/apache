@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Implement HSTS in Apache? - apache</title>
+    <meta name="description" content="Implementing HTTP Strict Transport Security (HSTS) in Apache is a crucial step toward securing your website by forcing browsers to connect only via HTTPS. This article provides a straightforward guide on how to enable HSTS, including enabling the necessa">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-implement-hsts-in-apache">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Implement HSTS in Apache? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-implement-hsts-in-apache" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Implementing HTTP Strict Transport Security (HSTS) in Apache is a crucial step toward securing your website by forcing browsers to connect only via HTTPS. This article provides a straightforward guide on how to enable HSTS, including enabling the necessa" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-implement-hsts-in-apache">How to Implement HSTS in
+Apache?</h1>
+<p>Implementing HTTP Strict Transport Security (HSTS) in Apache is a
+crucial step toward securing your website by forcing browsers to connect
+only via HTTPS. This article provides a straightforward guide on how to
+enable HSTS, including enabling the necessary Apache modules, editing
+your configuration files, and verifying that the security header is
+working correctly. By enforcing HSTS, you protect your users from
+man-in-the-middle attacks, SSL stripping, and cookie hijacking.</p>
+<h3 id="step-1-enable-the-apache-headers-module">Step 1: Enable the
+Apache Headers Module</h3>
+<p>Before you can add the HSTS header, you must ensure that Apache’s
+<code>mod_headers</code> module is enabled. This module allows you to
+merge, replace, or remove HTTP response headers.</p>
+<p>On Debian-based systems (like Ubuntu), run the following command in
+your terminal: <code>sudo a2enmod headers</code></p>
+<p>On Red Hat-based systems (like CentOS or RHEL), this module is
+typically enabled by default. You can verify it by restarting your
+Apache service: <code>sudo systemctl restart apache2</code> or
+<code>sudo systemctl restart httpd</code></p>
+<h3 id="step-2-configure-the-hsts-header">Step 2: Configure the HSTS
+Header</h3>
+<p>To implement HSTS, you need to add the
+<code>Strict-Transport-Security</code> header to your Apache
+configuration. It is highly recommended to add this rule only within
+your <strong>HTTPS virtual host configuration file</strong> (usually
+running on port 443), rather than the global configuration or the HTTP
+file.</p>
+<p>Open your SSL virtual host configuration file (e.g.,
+<code>/etc/apache2/sites-available/default-ssl.conf</code>) and insert
+the following line inside the <code>&lt;VirtualHost *:443&gt;</code>
+block:</p>
+<p><code>Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"</code></p>
+<p>Here is a breakdown of the directives used in this header:</p>
+<ul>
+<li><strong>max-age=63072000</strong>: Specifies the time, in seconds,
+that the browser should remember to only access the site via HTTPS.
+63,072,000 seconds equates to 2 years.</li>
+<li><strong>includeSubDomains</strong>: Applies the HSTS rule to all of
+the site’s subdomains as well.</li>
+<li><strong>preload</strong>: Signals that you want your domain to be
+eligible for inclusion in the HSTS preload list built into major
+browsers.</li>
+</ul>
+<h3 id="step-3-test-and-restart-apache">Step 3: Test and Restart
+Apache</h3>
+<p>Before applying the changes to your live environment, test your
+Apache configuration syntax to ensure there are no errors.</p>
+<p>Run the configuration test command:
+<code>sudo apachectl configtest</code></p>
+<p>If the output returns <code>Syntax OK</code>, restart the Apache
+service to apply the new security policy:
+<code>sudo systemctl restart apache2</code></p>
+<h3 id="step-4-verify-the-hsts-implementation">Step 4: Verify the HSTS
+Implementation</h3>
+<p>After restarting Apache, you should verify that the HSTS header is
+being sent correctly by using a command-line tool like
+<code>curl</code>.</p>
+<p>Run the following command, replacing your domain name accordingly:
+<code>curl -I https://yourdomain.com</code></p>
+<p>Look for the following line in the terminal output:
+<code>Strict-Transport-Security: max-age=63072000; includeSubDomains; preload</code></p>
+<p>If you see this header in the response, your Apache server is
+successfully implementing HTTP Strict Transport Security.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

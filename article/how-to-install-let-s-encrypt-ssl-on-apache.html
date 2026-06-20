@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Install Let's Encrypt SSL on Apache? - apache</title>
+    <meta name="description" content="Securing your website with HTTPS is essential for protecting user data and improving search engine rankings. This guide provides a straightforward, step-by-step walkthrough for installing a free Let's Encrypt SSL certificate on an Apache web server using">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-install-let-s-encrypt-ssl-on-apache">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Install Let's Encrypt SSL on Apache? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-install-let-s-encrypt-ssl-on-apache" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Securing your website with HTTPS is essential for protecting user data and improving search engine rankings. This guide provides a straightforward, step-by-step walkthrough for installing a free Let's Encrypt SSL certificate on an Apache web server using" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-install-lets-encrypt-ssl-on-apache">How to Install Let’s
+Encrypt SSL on Apache?</h1>
+<p>Securing your website with HTTPS is essential for protecting user
+data and improving search engine rankings. This guide provides a
+straightforward, step-by-step walkthrough for installing a free Let’s
+Encrypt SSL certificate on an Apache web server using Certbot. You will
+learn how to prepare your server, install the necessary software,
+generate the certificate, and configure automatic renewals to ensure
+continuous security.</p>
+<h2 id="prerequisites-before-installation">Prerequisites Before
+Installation</h2>
+<p>Before beginning the installation process, ensure that your
+environment meets the following requirements:</p>
+<ul>
+<li>A server running Apache with a registered domain name pointing to
+your server’s public IP address.</li>
+<li>SSH access to the server with a user account that has
+<code>sudo</code> privileges.</li>
+<li>Virtual hosts configured correctly for your domain (e.g.,
+<code>example.com</code> and <code>www.example.com</code>) so Certbot
+can automatically detect and update the Apache configuration.</li>
+</ul>
+<h2 id="step-1-install-certbot-and-the-apache-plugin">Step 1: Install
+Certbot and the Apache Plugin</h2>
+<p>Certbot is the official command-line tool used to automate the
+issuance and renewal of Let’s Encrypt certificates. You need to install
+Certbot along with its Apache plugin, which helps automate the
+configuration process.</p>
+<p>On Ubuntu or Debian systems, run the following commands:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install certbot python3-certbot-apache</span></code></pre></div>
+<p>On CentOS, RHEL, or Fedora systems, use the <code>dnf</code> package
+manager:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dnf install epel-release <span class="at">-y</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dnf install certbot python3-certbot-apache <span class="at">-y</span></span></code></pre></div>
+<h2 id="step-2-obtain-and-install-the-ssl-certificate">Step 2: Obtain
+and Install the SSL Certificate</h2>
+<p>Once Certbot is installed, you can trigger the certificate generation
+and automatic Apache configuration using a single command. The Apache
+plugin will modify your configuration files and handle the SSL handshake
+setup.</p>
+<p>Run the following command, replacing <code>example.com</code> with
+your actual domain:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> certbot <span class="at">--apache</span> <span class="at">-d</span> example.com <span class="at">-d</span> www.example.com</span></code></pre></div>
+<p>During this process, the terminal will prompt you for an email
+address for renewal notices and ask you to agree to the terms of
+service. Certbot will also ask whether you want to redirect all HTTP
+traffic to HTTPS. It is highly recommended to select the redirect option
+to ensure all connections to your site are secure.</p>
+<h2 id="step-3-verify-the-ssl-installation">Step 3: Verify the SSL
+Installation</h2>
+<p>After Certbot completes the setup, you should verify that the
+certificate is working correctly. Open a web browser and navigate to
+your domain using <code>https://</code>. Look for the padlock icon in
+the address bar to confirm the secure connection.</p>
+<p>You can perform a more technical and thorough analysis by using an
+external SSL testing tool, such as the SSL Labs Server Test. Input your
+domain name into the tool to receive a detailed report on your
+certificate validity, cryptographic protocols, and overall security
+score.</p>
+<h2 id="step-4-set-up-automatic-renewal">Step 4: Set Up Automatic
+Renewal</h2>
+<p>Let’s Encrypt certificates are valid for 90 days. Certbot
+automatically sets up a background system timer (via cron or systemd) to
+check for expiring certificates and renew them before they lapse.</p>
+<p>To ensure that the automatic renewal system is functioning properly,
+you can perform a dry run test with the following command:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> certbot renew <span class="at">--dry-run</span></span></code></pre></div>
+<p>If the command completes without errors, your server is fully
+configured to renew its SSL certificates automatically, requiring no
+further manual intervention.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

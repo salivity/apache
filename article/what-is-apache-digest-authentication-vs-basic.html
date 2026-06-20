@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Is Apache Digest Authentication vs Basic? - apache</title>
+    <meta name="description" content="This article provides a quick overview of HTTP authentication methods in the Apache web server, focusing specifically on Digest authentication and Basic authentication. You will learn how both mechanisms work to restrict access to web resources, their ke">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/what-is-apache-digest-authentication-vs-basic">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What Is Apache Digest Authentication vs Basic? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/what-is-apache-digest-authentication-vs-basic" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides a quick overview of HTTP authentication methods in the Apache web server, focusing specifically on Digest authentication and Basic authentication. You will learn how both mechanisms work to restrict access to web resources, their ke" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="what-is-apache-digest-authentication-vs-basic">What Is Apache
+Digest Authentication vs Basic?</h1>
+<p>This article provides a quick overview of HTTP authentication methods
+in the Apache web server, focusing specifically on Digest authentication
+and Basic authentication. You will learn how both mechanisms work to
+restrict access to web resources, their key technical differences, and
+why one offers a significantly higher level of security than the other.
+By the end of this guide, you will understand how to choose the right
+authentication protocol for your server configuration.</p>
+<h2 id="understanding-basic-authentication-in-apache">Understanding
+Basic Authentication in Apache</h2>
+<p>Basic authentication is the simplest method available in Apache for
+restricting access to a website or directory. When a user attempts to
+access a protected resource, the server challenges the browser,
+prompting a pop-up window that requests a username and password.</p>
+<p>Once entered, the browser encodes these credentials using the Base64
+algorithm and sends them in the HTTP request header. Because Base64 is
+merely an encoding scheme and not a form of encryption, the credentials
+can be easily intercepted and decoded by anyone sniffing the network
+traffic. Therefore, Basic authentication should never be used over
+unencrypted HTTP links; it requires an SSL/TLS layer (HTTPS) to be
+secure.</p>
+<h2 id="understanding-digest-authentication-in-apache">Understanding
+Digest Authentication in Apache</h2>
+<p>Digest authentication was introduced to address the glaring security
+vulnerabilities of Basic authentication. Instead of sending the user’s
+password over the network in a readable format, Digest authentication
+uses a challenge-response mechanism that relies on cryptographic
+hashing.</p>
+<p>When a user requests a protected page, the Apache server sends back a
+unique, temporary string called a “nonce” (number used once). The
+browser then takes the user’s password, combines it with the nonce and
+other request details, and hashes the data using an algorithm like MD5
+or SHA-256. This resulting hash, or “digest,” is sent back to the
+server. The server performs the same mathematical calculation on its
+end; if the hashes match, the user is granted access. The actual
+password never travels across the network.</p>
+<h2 id="key-differences-between-basic-and-digest-authentication">Key
+Differences Between Basic and Digest Authentication</h2>
+<p>While both methods serve the purpose of user verification, they
+differ fundamentally in security, performance, and implementation.</p>
+<ul>
+<li><strong>Credential Security:</strong> Basic authentication transmits
+credentials in an easily reversible Base64 string. Digest authentication
+transmits a one-way cryptographic hash, ensuring the raw password is
+never exposed to eavesdroppers.</li>
+<li><strong>Replay Attack Vulnerability:</strong> Basic authentication
+is highly vulnerable to replay attacks if not paired with HTTPS. Digest
+authentication mitigates this risk by using a server-generated nonce,
+which ensures that even if an attacker intercepts the hashed response,
+it cannot be reused for a later session.</li>
+<li><strong>Server Overhead:</strong> Basic authentication requires
+minimal processing power because encoding and decoding Base64 is
+computationally trivial. Digest authentication requires slightly more
+server overhead because the server must calculate cryptographic hashes
+for every authentication request.</li>
+<li><strong>Configuration Complexity:</strong> In Apache, Basic
+authentication is incredibly straightforward to set up using the
+<code>mod_auth_basic</code> module. Digest authentication, managed by
+<code>mod_auth_digest</code>, requires a bit more configuration,
+including the creation of a password file that stores pre-hashed
+credentials linked to a specific security “realm.”</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Is an Apache Module? - apache</title>
+    <meta name="description" content="An Apache module is a dynamic extension that integrates with the Apache HTTP Server to expand its core functionality. While the base Apache server handles fundamental web server tasks like accepting connections and serving files, modules allow administra">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/what-is-an-apache-module">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What Is an Apache Module? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/what-is-an-apache-module" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="An Apache module is a dynamic extension that integrates with the Apache HTTP Server to expand its core functionality. While the base Apache server handles fundamental web server tasks like accepting connections and serving files, modules allow administra" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="what-is-an-apache-module">What Is an Apache Module?</h1>
+<p>An Apache module is a dynamic extension that integrates with the
+Apache HTTP Server to expand its core functionality. While the base
+Apache server handles fundamental web server tasks like accepting
+connections and serving files, modules allow administrators to add
+advanced features such as enhanced security, content caching, URL
+rewriting, and support for programming languages. This modular
+architecture ensures that the server remains lightweight and efficient,
+as users only need to load the specific capabilities required for their
+web environment.</p>
+<hr />
+<h3 id="how-apache-modules-work">How Apache Modules Work</h3>
+<p>The Apache HTTP Server is built on a modular design. When the server
+starts up, it reads its configuration file (typically
+<code>httpd.conf</code> or <code>apache2.conf</code>) and loads the
+enabled modules into memory.</p>
+<p>These modules hook into the request-processing cycle. When a client
+requests a webpage, different modules handle different stages of that
+request, such as verifying user permissions, compressing the data, or
+routing the request to a backend application.</p>
+<h3 id="core-modules-vs.-third-party-modules">Core Modules
+vs. Third-Party Modules</h3>
+<p>Apache modules generally fall into two categories:</p>
+<ul>
+<li><strong>Standard (Core) Modules:</strong> These come bundled with
+the Apache software distribution. They are heavily tested, officially
+supported, and cover most standard web serving needs. Examples include
+<code>mod_ssl</code> for HTTPS encryption and <code>mod_rewrite</code>
+for manipulating URLs.</li>
+<li><strong>Third-Party Modules:</strong> These are created by external
+developers or organizations to add specialized functionality not
+included in the base package. For instance, <code>mod_security</code>
+acts as a web application firewall, while language-specific modules like
+<code>mod_php</code> allow Apache to process PHP scripts directly.</li>
+</ul>
+<h3 id="common-examples-of-apache-modules">Common Examples of Apache
+Modules</h3>
+<p>The flexibility of Apache is best understood through the specific
+tasks its modules perform:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Module Name</th>
+<th>Primary Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>mod_rewrite</strong></td>
+<td>Real-time URL redirection and manipulation based on specific
+rules.</td>
+</tr>
+<tr>
+<td><strong>mod_ssl</strong></td>
+<td>Provides strong cryptography using the Secure Sockets Layer and
+Transport Layer Security protocols.</td>
+</tr>
+<tr>
+<td><strong>mod_deflate</strong></td>
+<td>Compresses server output before sending it to the client to save
+network bandwidth.</td>
+</tr>
+<tr>
+<td><strong>mod_proxy</strong></td>
+<td>Allows the server to act as a proxy or gateway for backend
+application servers.</td>
+</tr>
+<tr>
+<td><strong>mod_headers</strong></td>
+<td>Customizes HTTP request and response headers for better control over
+security and caching.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="advantages-of-a-modular-architecture">Advantages of a Modular
+Architecture</h3>
+<p>The primary benefit of this system is <strong>resource
+optimization</strong>. Instead of running a massive, bloated piece of
+software that includes every possible feature, server administrators can
+keep the footprint small. Unused modules can be disabled, which
+minimizes memory usage and reduces the server’s attack surface against
+potential security vulnerabilities. Additionally, it allows developers
+to write custom modules to meet unique infrastructure needs without
+having to modify the core Apache source code.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

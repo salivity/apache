@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Mitigate Slowloris DDoS Attacks on Apache? - apache</title>
+    <meta name="description" content="Slowloris is a highly targeted Distributed Denial of Service (DDoS) attack that allows a single machine to take down an Apache web server by opening multiple connections and keeping them open as long as possible. By sending partial HTTP requests and hold">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-mitigate-slowloris-ddos-attacks-on-apache">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Mitigate Slowloris DDoS Attacks on Apache? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-mitigate-slowloris-ddos-attacks-on-apache" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Slowloris is a highly targeted Distributed Denial of Service (DDoS) attack that allows a single machine to take down an Apache web server by opening multiple connections and keeping them open as long as possible. By sending partial HTTP requests and hold" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-mitigate-slowloris-ddos-attacks-on-apache">How to
+Mitigate Slowloris DDoS Attacks on Apache?</h1>
+<p>Slowloris is a highly targeted Distributed Denial of Service (DDoS)
+attack that allows a single machine to take down an Apache web server by
+opening multiple connections and keeping them open as long as possible.
+By sending partial HTTP requests and holding the connections concurrent,
+it quickly exhausts the server’s maximum concurrent connection pool,
+rendering it unresponsive to legitimate traffic. This article explores
+how Slowloris operates and provides actionable configuration steps,
+module implementations, and best practices to protect your Apache server
+from being overwhelmed.</p>
+<h3 id="understanding-the-slowloris-threat">Understanding the Slowloris
+Threat</h3>
+<p>Unlike traditional volumetric DDoS attacks that attempt to flood a
+server’s bandwidth, Slowloris utilizes a low-and-slow approach. It
+initiates standard TCP connections but never completes the HTTP request
+headers. Because Apache’s default behavior is to keep the connection
+open while waiting for the rest of the data, its connection threads
+quickly become saturated.</p>
+<h3 id="implementation-of-mod_reqtimeout">Implementation of
+mod_reqtimeout</h3>
+<p>The most effective native method to combat Slowloris in modern Apache
+environments is using the <code>mod_reqtimeout</code> module. This
+module allows you to set explicit timeouts and minimum data rates for
+receiving request headers and body data. If a client takes too long,
+Apache automatically drops the connection.</p>
+<p>To configure this, ensure the module is enabled and add the following
+directives to your Apache configuration file (usually
+<code>httpd.conf</code> or <code>apache2.conf</code>):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;IfModule</span><span class="at"> mod_reqtimeout.c</span><span class="fu">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    RequestReadTimeout header<span class="st">=10-20,MinRate=500 body=20,MinRate=500</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/IfModule&gt;</span></span></code></pre></div>
+<p>In this configuration:</p>
+<ul>
+<li><strong>header=10-20,MinRate=500</strong>: Apache waits 10 seconds
+for the request headers. If the client sends data continuously at a
+minimum rate of 500 bytes per second, the timeout can extend up to a
+maximum of 20 seconds.</li>
+<li><strong>body=20,MinRate=500</strong>: Apache applies a similar logic
+to the request body, allowing a maximum of 20 seconds as long as the 500
+bytes per second threshold is met.</li>
+</ul>
+<h3 id="utilizing-mod_evasive-for-rate-limiting">Utilizing mod_evasive
+for Rate Limiting</h3>
+<p>Another powerful tool is <code>mod_evasive</code>, an Apache module
+designed to provide evasive action in the event of an HTTP DoS/DDoS
+attack or brute force attack. It maintains an internal dynamic table of
+IP addresses and blocks anyone who requests the same page too many times
+or makes too many concurrent requests.</p>
+<p>Once installed, you can customize its behavior within your
+configuration:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;IfModule</span><span class="at"> mod_evasive24.c</span><span class="fu">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    DOSHashTableSize    3097</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    DOSPageCount        2</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    DOSSiteCount        50</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    DOSPageInterval     1</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    DOSSiteInterval     1</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    DOSBlockingPeriod   10</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/IfModule&gt;</span></span></code></pre></div>
+<p>This configuration blocks an IP address for 10 seconds if it requests
+the same page more than twice a second, or more than 50 total resources
+on the site within one second.</p>
+<h3 id="tuning-core-apache-directives">Tuning Core Apache
+Directives</h3>
+<p>You can also adjust core Apache directives to limit the resources a
+single attacker can consume. While these settings do not stop a
+sophisticated attack on their own, they significantly increase your
+server’s resilience when paired with other tools.</p>
+<ul>
+<li><strong>KeepAlive</strong>: Ensure <code>KeepAlive</code> is
+enabled, but lower the <code>KeepAliveTimeout</code>. By reducing this
+value from the default 5 seconds down to 2 or 3 seconds, you force
+Apache to close idle connections much faster.</li>
+<li><strong>MaxRequestWorkers</strong>: Ensure your
+<code>MaxRequestWorkers</code> (formerly <code>MaxClients</code>)
+directive is tuned according to your server’s available RAM. This
+prevents the server from swapping to disk if it experiences a sudden
+spike in connection attempts.</li>
+</ul>
+<h3 id="deploying-a-reverse-proxy">Deploying a Reverse Proxy</h3>
+<p>If application-level tweaks are not enough, placing a reverse proxy
+or a specialized load balancer in front of your Apache server provides
+an excellent layer of defense. Software like Nginx or HAProxy handles
+connections differently than Apache’s process-per-connection model.</p>
+<p>Nginx uses an asynchronous, event-driven architecture that can handle
+tens of thousands of concurrent connections effortlessly. It completely
+buffers incoming HTTP requests before passing them to the backend Apache
+server. Because a Slowloris attack never completes the request headers,
+the malicious connection is terminated at the Nginx layer, ensuring your
+Apache server never even sees the attack traffic.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

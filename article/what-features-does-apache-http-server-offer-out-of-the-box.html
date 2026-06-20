@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Features Does Apache HTTP Server Offer Out of the Box? - apache</title>
+    <meta name="description" content="The Apache HTTP Server remains one of the most widely used web servers globally due to its robust, reliable, and highly extensible architecture. Out of the box, Apache provides a comprehensive suite of native features designed to handle everything from b">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/what-features-does-apache-http-server-offer-out-of-the-box">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What Features Does Apache HTTP Server Offer Out of the Box? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/what-features-does-apache-http-server-offer-out-of-the-box" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The Apache HTTP Server remains one of the most widely used web servers globally due to its robust, reliable, and highly extensible architecture. Out of the box, Apache provides a comprehensive suite of native features designed to handle everything from b" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="what-features-does-apache-http-server-offer-out-of-the-box">What
+Features Does Apache HTTP Server Offer Out of the Box?</h1>
+<p>The Apache HTTP Server remains one of the most widely used web
+servers globally due to its robust, reliable, and highly extensible
+architecture. Out of the box, Apache provides a comprehensive suite of
+native features designed to handle everything from basic static content
+delivery to complex security, traffic management, and dynamic content
+routing. Without requiring third-party add-ons, a core Apache
+installation delivers essential tools for modular customization,
+advanced directory control, flexible logging, and powerful URL
+manipulation, making it a versatile foundation for modern web
+infrastructure.</p>
+<h2 id="core-multi-processing-modules-mpms">Core Multi-Processing
+Modules (MPMs)</h2>
+<p>At its core, Apache handles incoming requests using Multi-Processing
+Modules, which dictate how the server architecture scales and utilizes
+system resources. Users can choose from three primary MPMs out of the
+box depending on their OS and performance needs:</p>
+<ul>
+<li><strong>Prefork MPM:</strong> Uses multiple child processes, each
+handling one connection at a time. It is highly stable and isolated,
+making it ideal for non-thread-safe modules like older PHP
+implementations.</li>
+<li><strong>Worker MPM:</strong> Uses a hybrid multi-process
+multi-threaded approach. Each process manages multiple threads, allowing
+the server to handle a larger volume of concurrent requests with a lower
+memory footprint than Prefork.</li>
+<li><strong>Event MPM:</strong> An evolution of the Worker MPM, it
+dedicates specific threads to listening for new requests while passing
+active connections to worker threads. This efficiently manages
+“Keep-Alive” connections, drastically reducing resource consumption
+under heavy traffic.</li>
+</ul>
+<h2 id="advanced-traffic-and-url-management">Advanced Traffic and URL
+Management</h2>
+<p>Apache excels at modifying and routing web traffic natively, allowing
+administrators to reshape how clients interact with the server.</p>
+<ul>
+<li><strong>URL Rewriting (mod_rewrite):</strong> Often referred to as
+the “Swiss Army knife” of web servers, this built-in engine allows for
+real-time manipulation of URL paths based on regular expressions,
+environment variables, and HTTP headers.</li>
+<li><strong>Reverse Proxy and Load Balancing (mod_proxy):</strong>
+Apache can act as a gateway, forwarding client requests to backend
+application servers (like Tomcat or Node.js) and distributing the
+traffic load evenly across multiple backend instances.</li>
+<li><strong>Content Caching:</strong> Built-in caching modules allow
+Apache to store frequently requested content in memory or on disk,
+reducing backend application load and speeding up response times for
+users.</li>
+</ul>
+<h2 id="security-and-access-control">Security and Access Control</h2>
+<p>Out-of-the-box security features ensure that administrators can
+protect sensitive data and restrict access without relying on external
+software.</p>
+<ul>
+<li><strong>Robust TLS/SSL Support (mod_ssl):</strong> Apache provides
+native support for cryptography via SSL and TLS protocols, enabling
+secure HTTPS communication, certificate management, and enforcement of
+strong cipher suites.</li>
+<li><strong>Authentication and Authorization:</strong> The server
+includes native modules for basic and digest HTTP authentication. It can
+restrict access to specific directories based on usernames, passwords,
+IP addresses, or hostnames.</li>
+<li><strong>Per-Directory Configuration (.htaccess):</strong> Apache
+allows decentralized configuration management. By placing an
+<code>.htaccess</code> file in a specific directory, administrators or
+users can override global server settings for that directory and its
+subdirectories on the fly.</li>
+</ul>
+<h2 id="flexible-customization-and-diagnostics">Flexible Customization
+and Diagnostics</h2>
+<p>Monitoring server health and tailoring responses to user capabilities
+are seamlessly integrated into the core package.</p>
+<ul>
+<li><strong>Highly Custom Logging:</strong> Apache offers granular
+logging capabilities, allowing administrators to format access and error
+logs to track precise data points, track down malicious behavior, or
+analyze traffic patterns.</li>
+<li><strong>Content Negotiation (mod_negotiation):</strong> The server
+can automatically serve different versions of a webpage (such as
+different languages or file formats) based on the preferences submitted
+by the user’s browser.</li>
+<li><strong>Server-Side Includes (SSI):</strong> A native feature that
+permits HTML files to be dynamically parsed by the server to include
+small pieces of code, text, or file data before being sent to the client
+browser.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

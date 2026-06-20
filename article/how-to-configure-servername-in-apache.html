@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure ServerName in Apache? - apache</title>
+    <meta name="description" content="Configuring the ServerName directive in Apache is a foundational step in web server administration, ensuring that your server correctly identifies itself and routes web traffic to the appropriate website. This guide provides a straightforward overview of">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-configure-servername-in-apache">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure ServerName in Apache? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-configure-servername-in-apache" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring the ServerName directive in Apache is a foundational step in web server administration, ensuring that your server correctly identifies itself and routes web traffic to the appropriate website. This guide provides a straightforward overview of" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-configure-servername-in-apache">How to Configure
+ServerName in Apache?</h1>
+<p>Configuring the <code>ServerName</code> directive in Apache is a
+foundational step in web server administration, ensuring that your
+server correctly identifies itself and routes web traffic to the
+appropriate website. This guide provides a straightforward overview of
+how <code>ServerName</code> works, where to locate it in your
+configuration files, and the exact steps required to set it up for both
+global server identification and individual Virtual Hosts.</p>
+<h2 id="understanding-the-servername-directive">Understanding the
+ServerName Directive</h2>
+<p>The <code>ServerName</code> directive tells the Apache HTTP Server
+its own hostname and port. It is primarily used for two critical
+functions:</p>
+<ul>
+<li><strong>Generating Self-Referencing URLs:</strong> When Apache
+redirects a user, it uses the <code>ServerName</code> to construct the
+correct URL. Without it, the server might attempt to use the client’s
+requested hostname or the server’s internal IP address, often leading to
+broken links.</li>
+<li><strong>Virtual Host Matching:</strong> In a shared hosting
+environment where multiple websites run on a single IP address, Apache
+uses the <code>ServerName</code> (and <code>ServerAlias</code>) within a
+<code>&lt;VirtualHost&gt;</code> block to determine which website’s
+files should be served to the visitor.</li>
+</ul>
+<h2 id="step-by-step-configuration">Step-by-Step Configuration</h2>
+<p>To configure <code>ServerName</code>, you will need administrative
+access (sudo privileges) to your server’s terminal.</p>
+<h3 id="locate-your-configuration-file">1. Locate Your Configuration
+File</h3>
+<p>Depending on your operating system, the main Apache configuration
+file or the Virtual Host files are located in different directories:</p>
+<ul>
+<li><strong>Ubuntu / Debian:</strong>
+<code>/etc/apache2/apache2.conf</code> (global) or
+<code>/etc/apache2/sites-available/your-site.conf</code> (virtual
+hosts).</li>
+<li><strong>CentOS / RHEL / Fedora:</strong>
+<code>/etc/httpd/conf/httpd.conf</code>.</li>
+</ul>
+<h3 id="configure-global-servername">2. Configure Global ServerName</h3>
+<p>If you do not set a global <code>ServerName</code>, Apache will
+generate a harmless but annoying warning when restarting: <em>“Could not
+reliably determine the server’s fully qualified domain name”</em>.</p>
+<p>To fix this, open your main configuration file and add or modify the
+directive at the global level:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ServerName<span class="st"> your-server-ip-or-domain.com</span></span></code></pre></div>
+<h3 id="configure-servername-for-virtual-hosts">3. Configure ServerName
+for Virtual Hosts</h3>
+<p>To map a specific domain name to a specific website on your server,
+place the <code>ServerName</code> directive inside the corresponding
+<code>&lt;VirtualHost&gt;</code> block. You can also use
+<code>ServerAlias</code> to match variations like the “www”
+subdomain.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;VirtualHost</span><span class="at"> *:80</span><span class="fu">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ServerAdmin<span class="st"> webmaster@example.com</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    DocumentRoot<span class="st"> /var/www/example.com/public_html</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    ServerName<span class="st"> example.com</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    ServerAlias<span class="st"> www.example.com</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    ErrorLog<span class="st"> ${APACHE_LOG_DIR}/error.log</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    CustomLog<span class="st"> ${APACHE_LOG_DIR}/access.log combined</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/VirtualHost&gt;</span></span></code></pre></div>
+<h3 id="test-and-restart-apache">4. Test and Restart Apache</h3>
+<p>Before applying the changes, always check your Apache configuration
+syntax for errors to avoid crashing your web server.</p>
+<p>Run the syntax test command:</p>
+<ul>
+<li><strong>Ubuntu/Debian:</strong>
+<code>sudo apache2ctl configtest</code></li>
+<li><strong>CentOS/RHEL:</strong> <code>sudo httpd -t</code></li>
+</ul>
+<p>If the output says <strong>Syntax OK</strong>, safely restart the
+Apache service to apply your new settings:</p>
+<ul>
+<li><strong>Ubuntu/Debian:</strong>
+<code>sudo systemctl restart apache2</code></li>
+<li><strong>CentOS/RHEL:</strong>
+<code>sudo systemctl restart httpd</code></li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

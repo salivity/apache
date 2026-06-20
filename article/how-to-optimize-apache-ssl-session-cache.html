@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Optimize Apache SSL Session Cache? - apache</title>
+    <meta name="description" content="Optimizing the SSL/TLS session cache in the Apache HTTP Server is a highly effective way to reduce CPU load and improve server response times. When a client establishes a secure connection, the cryptographic handshake consumes significant CPU cycles. By">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-optimize-apache-ssl-session-cache">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Optimize Apache SSL Session Cache? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-optimize-apache-ssl-session-cache" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Optimizing the SSL/TLS session cache in the Apache HTTP Server is a highly effective way to reduce CPU load and improve server response times. When a client establishes a secure connection, the cryptographic handshake consumes significant CPU cycles. By" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-optimize-apache-ssl-session-cache">How to Optimize Apache
+SSL Session Cache?</h1>
+<p>Optimizing the SSL/TLS session cache in the Apache HTTP Server is a
+highly effective way to reduce CPU load and improve server response
+times. When a client establishes a secure connection, the cryptographic
+handshake consumes significant CPU cycles. By caching session
+parameters, subsequent requests from the same client can reuse the
+previous cryptographic material through session resumption, bypassing
+the heavy mathematical lifting of the full initial handshake. This
+article explores how SSL session caching works, the different cache
+types available in Apache, and best practices for configuring them to
+maximize performance.</p>
+<hr />
+<h2 id="understanding-ssl-session-resumption">Understanding SSL Session
+Resumption</h2>
+<p>Every new SSL/TLS connection requires a handshake where the server
+and client agree on encryption keys. This process involves asymmetric
+cryptography, which is notoriously CPU-intensive.</p>
+<p>Apache supports two primary methods to mitigate this overhead:</p>
+<ul>
+<li><strong>Session IDs (Server-Side Caching):</strong> The server
+stores the session states in a local cache and sends a unique Session ID
+to the client. On the next connection, the client presents this ID, and
+if Apache finds it in its cache, it resumes the session.</li>
+<li><strong>Session Tickets (Client-Side Caching):</strong> The server
+encrypts the session state and sends it to the client as a ticket. The
+client stores it and sends it back later. This removes the storage
+burden from the server entirely.</li>
+</ul>
+<p>While session tickets are highly efficient, combining them with a
+well-configured server-side session cache ensures optimal compatibility
+and performance across all browser types.</p>
+<hr />
+<h2 id="choosing-the-right-cache-mechanism">Choosing the Right Cache
+Mechanism</h2>
+<p>Apache uses the <code>SSLSessionCache</code> directive to define
+where and how it stores session data. There are three main mechanisms
+used depending on the scale of the deployment:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Cache Type</th>
+<th>Directive Syntax Example</th>
+<th>Best Used For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>socache_shmcb</strong></td>
+<td><code>shmcb:/path/to/datafile(512000)</code></td>
+<td>Single-server setups (High performance, memory-mapped)</td>
+</tr>
+<tr>
+<td><strong>socache_redis</strong></td>
+<td><code>redis://127.0.0.1:6379/1</code></td>
+<td>Distributed, multi-server load-balanced environments</td>
+</tr>
+<tr>
+<td><strong>socache_memcache</strong></td>
+<td><code>memcache:127.0.0.1:11211</code></td>
+<td>Shared caching across multiple frontend web servers</td>
+</tr>
+</tbody>
+</table>
+<p>For most standalone servers, <strong>shmcb</strong> (Shared Memory
+Cyclic Buffer) is the gold standard. It is incredibly fast because it
+utilizes a cyclic buffer inside a shared memory segment, meaning it
+never blocks and automatically overwrites old entries when full.</p>
+<hr />
+<h2 id="step-by-step-configuration-for-apache">Step-by-Step
+Configuration for Apache</h2>
+<p>To optimize the cache and reduce your CPU load, you need to modify
+your Apache configuration file (usually <code>httpd.conf</code> or
+<code>ssl.conf</code>).</p>
+<h3 id="enable-the-session-cache-module">1. Enable the Session Cache
+Module</h3>
+<p>Ensure that the <code>mod_ssl</code> and the appropriate storage
+module (like <code>mod_socache_shmcb</code>) are loaded:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>LoadModule<span class="st"> ssl_module modules/mod_ssl.so</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>LoadModule<span class="st"> socache_shmcb_module modules/mod_socache_shmcb.so</span></span></code></pre></div>
+<h3 id="configure-the-sslsessioncache-directive">2. Configure the
+SSLSessionCache Directive</h3>
+<p>Add or update the <code>SSLSessionCache</code> directive. Allocating
+an appropriate size prevents the cache from thrashing and evicting
+active sessions prematurely. A 512 KB cache can typically hold around
+4,000 sessions.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">SSLSessionCache</span><span class="ch"> &quot;shmcb:/var/run/apache2/ssl_scache(512000)&quot;</span></span></code></pre></div>
+<h3 id="adjust-the-cache-timeout">3. Adjust the Cache Timeout</h3>
+<p>The <code>SSLSessionCacheTimeout</code> directive dictates how long
+(in seconds) a session remains valid in the cache. If the timeout is too
+short, clients will constantly trigger full handshakes. If it is too
+long, you risk consuming memory on dead sessions.</p>
+<p>A timeout of 5 to 10 minutes (300 to 600 seconds) strikes an ideal
+balance for high-traffic sites:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">SSLSessionCacheTimeout</span><span class="ch"> </span><span class="fl">300</span></span></code></pre></div>
+<hr />
+<h2 id="verifying-and-monitoring-the-performance">Verifying and
+Monitoring the Performance</h2>
+<p>After applying the changes, restart Apache to apply the
+configuration:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart apache2</span></code></pre></div>
+<p>To verify that the session cache is actively reducing your CPU load,
+you can use the OpenSSL benchmarking tool to test session
+resumption:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">openssl</span> s_client <span class="at">-connect</span> localhost:443 <span class="at">-reconnect</span></span></code></pre></div>
+<p>Look closely at the output. The first connection should show a full
+handshake, while the subsequent connections should explicitly state
+<strong>“Reused, TLSv1.3, Cipher is…”</strong>. If the session is
+successfully reused, your configuration is correct, and your CPU is no
+longer wasting cycles on redundant cryptographic handshakes.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

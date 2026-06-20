@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Include Multiple Apache Config Files? - apache</title>
+    <meta name="description" content="Managing a growing web server can become chaotic if all directives are crammed into a single file. Fortunately, Apache allows you to split your configuration into smaller, modular files and load them dynamically into the main configuration. This article">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-include-multiple-apache-config-files">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Include Multiple Apache Config Files? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-include-multiple-apache-config-files" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing a growing web server can become chaotic if all directives are crammed into a single file. Fortunately, Apache allows you to split your configuration into smaller, modular files and load them dynamically into the main configuration. This article" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-include-multiple-apache-config-files">How to Include
+Multiple Apache Config Files?</h1>
+<p>Managing a growing web server can become chaotic if all directives
+are crammed into a single file. Fortunately, Apache allows you to split
+your configuration into smaller, modular files and load them dynamically
+into the main configuration. This article provides a quick overview of
+how to use the <code>Include</code> and <code>IncludeOptional</code>
+directives, how to organize your configuration directory structure, and
+best practices for testing your changes without bringing down your live
+server.</p>
+<h3 id="the-include-directives">The Include Directives</h3>
+<p>Apache provides two primary directives to reference external
+configuration files within your main <code>httpd.conf</code> or
+<code>apache2.conf</code> file.</p>
+<ul>
+<li><strong><code>Include</code></strong>: Tells Apache to load specific
+files or directories. If the specified file or path does not exist,
+Apache will throw a syntax error and fail to start or reload.</li>
+<li><strong><code>IncludeOptional</code></strong>: Functions exactly
+like <code>Include</code>, but with one key difference: if the target
+file or directory does not exist or contains no matching files, Apache
+will ignore it and continue booting up without throwing an error.</li>
+</ul>
+<h3 id="how-to-use-absolute-and-relative-paths">How to Use Absolute and
+Relative Paths</h3>
+<p>You can include files by specifying their exact location on the
+server. If you use a relative path, Apache resolves it against the
+directory defined by your <code>ServerRoot</code> directive.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Loading a single file via absolute path</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>Include<span class="st"> /etc/httpd/conf.d/vhosts/example.com.conf</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Loading a single file via relative path (relative to ServerRoot)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>Include<span class="st"> conf.d/custom-settings.conf</span></span></code></pre></div>
+<h3 id="loading-entire-directories-with-wildcards">Loading Entire
+Directories with Wildcards</h3>
+<p>Instead of adding a new line for every single website or
+configuration change, you can instruct Apache to load all files inside a
+specific folder using the <code>*</code> wildcard. This is highly
+efficient for managing multiple Virtual Hosts.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Include all configuration files in a specific directory</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>IncludeOptional conf.d/*.conf</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Include configuration files from a nested structure</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>Include<span class="st"> /etc/apache2/sites-enabled/*.conf</span></span></code></pre></div>
+<h3 id="best-practices-for-modular-configurations">Best Practices for
+Modular Configurations</h3>
+<p>To maintain a clean and reliable server environment, consider
+adopting the standard structural patterns used by major Linux
+distributions:</p>
+<ul>
+<li><strong>Sites-Available vs. Sites-Enabled</strong>: Keep your actual
+Virtual Host files in a <code>sites-available/</code> directory. Use
+symbolic links inside a <code>sites-enabled/</code> directory to point
+to the active sites, and use <code>Include</code> on the enabled
+directory.</li>
+<li><strong>Use Descriptive Extensions</strong>: Always suffix your
+modular files with <code>.conf</code> so they are easily targetable by
+wildcards and distinct from backup or temporary files.</li>
+<li><strong>Always Test Syntax</strong>: Before restarting your web
+server after modifying configuration files, always run the configuration
+test command to check for syntax errors:</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For Ubuntu/Debian systems</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">apache2ctl</span> configtest</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># For CentOS/RHEL/Fedora systems</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">httpd</span> <span class="at">-t</span></span></code></pre></div></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

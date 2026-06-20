@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure Apache Log Rotation? - apache</title>
+    <meta name="description" content="This article provides a straightforward, step-by-step guide to setting up and configuring log rotation for the Apache HTTP Server. Managing server logs is critical for maintaining system health, avoiding disk space exhaustion, and ensuring efficient trou">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-configure-apache-log-rotation">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure Apache Log Rotation? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-configure-apache-log-rotation" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides a straightforward, step-by-step guide to setting up and configuring log rotation for the Apache HTTP Server. Managing server logs is critical for maintaining system health, avoiding disk space exhaustion, and ensuring efficient trou" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-configure-apache-log-rotation">How to Configure Apache
+Log Rotation?</h1>
+<p>This article provides a straightforward, step-by-step guide to
+setting up and configuring log rotation for the Apache HTTP Server.
+Managing server logs is critical for maintaining system health, avoiding
+disk space exhaustion, and ensuring efficient troubleshooting. Below,
+you will find instructions on utilizing the industry-standard
+<code>logrotate</code> utility, configuring its settings for Apache, and
+verifying that your logs are cycling correctly without interrupting web
+services.</p>
+<h2 id="understanding-apache-log-rotation">Understanding Apache Log
+Rotation</h2>
+<p>Apache continuously records server activity to its
+<code>access.log</code> and <code>error.log</code> files. Over time,
+these files can grow to massive sizes, draining disk space and making
+log analysis nearly impossible. Log rotation solves this by periodically
+closing the current log file, renaming it (often appending a date),
+compressing it, and creating a fresh, empty file for new log data.</p>
+<p>On most Linux distributions, Apache automatically integrates with
+<code>logrotate</code>, a powerful system utility designed to automate
+this exact process.</p>
+<h2 id="step-by-step-configuration-using-logrotate">Step-by-Step
+Configuration Using logrotate</h2>
+<p>The configuration for <code>logrotate</code> is managed via text
+files located in the <code>/etc/logrotate.d/</code> directory. Apache
+typically creates its own configuration file there during
+installation.</p>
+<h3 id="open-the-apache-logrotate-configuration">1. Open the Apache
+logrotate Configuration</h3>
+<p>To view or edit the current rotation settings for Apache, open the
+configuration file using a text editor with root privileges:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/logrotate.d/apache2</span></code></pre></div>
+<p><em>(Note: On Red Hat-based systems like CentOS or RHEL, the file is
+usually named <code>/etc/logrotate.d/httpd</code>.)</em></p>
+<h3 id="define-the-rotation-rules">2. Define the Rotation Rules</h3>
+<p>Inside the file, you will see a block of code defining how the logs
+should be handled. A standard, optimized configuration looks like
+this:</p>
+<pre class="text"><code>/var/log/apache2/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 640 root adm
+    sharedscripts
+    postrotate
+        if invoke-rc.d apache2 status &gt; /dev/null 2&gt;&amp;1; then \
+            invoke-rc.d apache2 reload &gt; /dev/null 2&gt;&amp;1; \
+        fi;
+    endscript
+}
+</code></pre>
+<h3 id="key-configuration-parameters-explained">3. Key Configuration
+Parameters Explained</h3>
+<p>To customize how your logs are handled, adjust the following
+parameters inside the configuration block:</p>
+<ul>
+<li><strong>daily / weekly / monthly:</strong> Determines how frequently
+the logs are rotated.</li>
+<li><strong>rotate 14:</strong> Specifies the number of old log files to
+keep before deleting the oldest one. In this case, 14 days of logs are
+retained.</li>
+<li><strong>compress:</strong> Compresses the rotated log files using
+gzip to save significant disk space.</li>
+<li><strong>delaycompress:</strong> Postpones the compression of the
+most recent rotated log file until the next rotation cycle, ensuring
+Apache does not run into conflicts trying to write to a zipped
+file.</li>
+<li><strong>missingok:</strong> Prevents the system from throwing an
+error if a log file is missing.</li>
+<li><strong>notifempty:</strong> Instructs <code>logrotate</code> not to
+rotate the log if it is completely empty.</li>
+<li><strong>sharedscripts / postrotate:</strong> This section runs a
+command <em>after</em> all logs have been rotated. The script reloads
+Apache, forcing the webserver to release the old log files and start
+writing to the newly created ones without dropping any live user
+traffic.</li>
+</ul>
+<h2 id="testing-your-configuration">Testing Your Configuration</h2>
+<p>After saving your changes, you can verify that the configuration is
+syntactically correct and simulate a log rotation. Run the following
+command to force a dry run:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> logrotate <span class="at">-df</span> /etc/logrotate.d/apache2</span></code></pre></div>
+<p>The <code>-d</code> (debug) flag prints out exactly what
+<code>logrotate</code> would do without actually modifying any files,
+allowing you to catch errors before they impact your live production
+environment.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

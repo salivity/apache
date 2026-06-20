@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure an Apache Reverse Proxy? - apache</title>
+    <meta name="description" content="Configuring an Apache HTTP Server as a reverse proxy allows you to forward incoming client requests to a backend server, such as a Node.js, Python, or Tomcat application. This setup enhances security, enables load balancing, and centralizes SSL terminati">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-configure-an-apache-reverse-proxy">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure an Apache Reverse Proxy? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-configure-an-apache-reverse-proxy" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring an Apache HTTP Server as a reverse proxy allows you to forward incoming client requests to a backend server, such as a Node.js, Python, or Tomcat application. This setup enhances security, enables load balancing, and centralizes SSL terminati" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-configure-an-apache-reverse-proxy">How to Configure an
+Apache Reverse Proxy?</h1>
+<p>Configuring an Apache HTTP Server as a reverse proxy allows you to
+forward incoming client requests to a backend server, such as a Node.js,
+Python, or Tomcat application. This setup enhances security, enables
+load balancing, and centralizes SSL termination. By utilizing Apache’s
+<code>mod_proxy</code> core module along with its specific protocol
+extensions, administrators can seamlessly route traffic while masking
+the identity and structure of internal backend servers.</p>
+<h2 id="prerequisites-and-required-modules">Prerequisites and Required
+Modules</h2>
+<p>Before initiating the configuration, you must ensure that the
+necessary proxy modules are enabled within your Apache installation. On
+Debian and Ubuntu-based systems, these modules can be activated using
+the <code>a2enmod</code> command, while RHEL and CentOS systems
+typically have them enabled by default in the main configuration
+file.</p>
+<p>The core modules required for standard HTTP reverse proxying
+include:</p>
+<ul>
+<li><strong><code>mod_proxy</code></strong>: The main proxy module that
+manages connections and routing.</li>
+<li><strong><code>mod_proxy_http</code></strong>: Adds support for
+proxying HTTP and HTTPS requests.</li>
+<li><strong><code>mod_proxy_wstunnel</code></strong>: Required if your
+backend application utilizes WebSockets.</li>
+</ul>
+<p>To enable these modules on Ubuntu or Debian, execute the following
+commands in your terminal:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2enmod proxy</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> a2enmod proxy_http</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart apache2</span></code></pre></div>
+<h2 id="basic-reverse-proxy-configuration">Basic Reverse Proxy
+Configuration</h2>
+<p>To route incoming traffic from your Apache server to a backend
+application running locally (for example, on port 3000), you need to
+modify your virtual host configuration file. This file is typically
+located in <code>/etc/apache2/sites-available/</code> on Debian/Ubuntu
+or <code>/etc/httpd/conf.d/</code> on RHEL/CentOS.</p>
+<p>Open your virtual host configuration file and insert the
+<code>ProxyPass</code> and <code>ProxyPassReverse</code> directives
+within the <code>&lt;VirtualHost&gt;</code> block:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;VirtualHost</span><span class="at"> *:80</span><span class="fu">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ServerName<span class="st"> yourdomain.com</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="ex">ProxyPreserveHost</span><span class="ch"> </span><span class="kw">On</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    ProxyPass<span class="st"> / http://127.0.0.1:3000/</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    ProxyPassReverse<span class="st"> / http://127.0.0.1:3000/</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    ErrorLog<span class="st"> ${APACHE_LOG_DIR}/proxy-error.log</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    CustomLog<span class="st"> ${APACHE_LOG_DIR}/proxy-access.log combined</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/VirtualHost&gt;</span></span></code></pre></div>
+<h3 id="key-directives-explained">Key Directives Explained</h3>
+<h3 id="proxypreservehost">ProxyPreserveHost</h3>
+<p>Setting <code>ProxyPreserveHost On</code> instructs Apache to pass
+the original <code>Host</code> header from the client request to the
+backend server. This is critical if your backend application relies on
+the domain name to serve specific content or handle routing.</p>
+<h3 id="proxypass">ProxyPass</h3>
+<p>The <code>ProxyPass</code> directive maps the remote server to the
+local server URL space. In the example above,
+<code>ProxyPass / http://127.0.0.1:3000/</code> specifies that all
+requests incoming to the root URL (<code>/</code>) should be forwarded
+to the backend application running at
+<code>http://127.0.0.1:3000/</code>.</p>
+<h3 id="proxypassreverse">ProxyPassReverse</h3>
+<p>The <code>ProxyPassReverse</code> directive is crucial because it
+adjusts the headers in HTTP redirect responses sent by the backend
+server. If the backend application issues a redirect to an internal IP
+address, Apache intercepts the header and rewrites it to match your
+public domain name, preventing the client from attempting to connect to
+an unreachable internal address.</p>
+<h2 id="managing-subdirectory-proxying">Managing Subdirectory
+Proxying</h2>
+<p>If you do not want to proxy the entire domain, you can target
+specific subdirectories or application paths. This approach is useful
+when Apache serves static website content from the root directory but
+needs to route specific API traffic to an application server.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;VirtualHost</span><span class="at"> *:80</span><span class="fu">&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    ServerName<span class="st"> yourdomain.com</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    DocumentRoot<span class="st"> /var/www/html</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    ProxyPass<span class="st"> /api http://127.0.0.1:3000/api</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    ProxyPassReverse<span class="st"> /api http://127.0.0.1:3000/api</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/VirtualHost&gt;</span></span></code></pre></div>
+<p>In this scenario, requests to <code>yourdomain.com/index.html</code>
+are handled by the local document root, while any requests directed to
+<code>yourdomain.com/api</code> are securely routed to the backend
+service.</p>
+<h2 id="testing-and-applying-changes">Testing and Applying Changes</h2>
+<p>Whenever changes are made to Apache configuration files, it is vital
+to test the syntax before restarting the service to avoid unexpected
+downtime.</p>
+<p>Run the syntax check command:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apachectl configtest</span></code></pre></div>
+<p>If the output displays <code>Syntax OK</code>, apply the new
+configuration by restarting the Apache service:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart apache2</span></code></pre></div></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

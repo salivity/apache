@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Debug and Trace Apache mod_rewrite Rules - apache</title>
+    <meta name="description" content="Debugging Apache modrewrite rules can feel like solving a puzzle in the dark because URL transformations happen entirely behind the scenes. This article provides a straightforward guide on how to enable, configure, and interpret Apache’s built-in loggi">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-debug-and-trace-apache-mod-rewrite-rules">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Debug and Trace Apache mod_rewrite Rules - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-debug-and-trace-apache-mod-rewrite-rules" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Debugging Apache modrewrite rules can feel like solving a puzzle in the dark because URL transformations happen entirely behind the scenes. This article provides a straightforward guide on how to enable, configure, and interpret Apache’s built-in loggi" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-debug-and-trace-apache-mod_rewrite-rules">How to Debug
+and Trace Apache mod_rewrite Rules</h1>
+<p>Debugging Apache <code>mod_rewrite</code> rules can feel like solving
+a puzzle in the dark because URL transformations happen entirely behind
+the scenes. This article provides a straightforward guide on how to
+enable, configure, and interpret Apache’s built-in logging mechanism to
+trace exactly how your rewrite rules are being executed. By using the
+<code>LogLevel</code> directive, you can pinpoint why a redirect is
+failing, see which specific regex patterns are matching, and observe the
+final URI output in real-time.</p>
+<h3 id="step-1-configure-loglevel-for-mod_rewrite">Step 1: Configure
+LogLevel for mod_rewrite</h3>
+<p>In older versions of Apache (v2.2 and earlier), debugging required a
+dedicated <code>RewriteLog</code> directive. In modern Apache
+environments (v2.4 and later), this has been replaced by a highly
+flexible, per-module <code>LogLevel</code> configuration.</p>
+<p>To start tracing your rules, you need to modify your Apache
+configuration file (usually <code>httpd.conf</code>,
+<code>apache2.conf</code>, or your specific VirtualHost file). Add or
+modify the <code>LogLevel</code> directive to target
+<code>mod_rewrite</code> specifically:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">LogLevel</span><span class="ch"> </span><span class="kw">alert</span><span class="ch"> rewrite:trace3</span></span></code></pre></div>
+<p>The <code>rewrite:trace3</code> argument tells Apache to capture the
+internal execution steps of the rewrite engine. You can adjust the
+verbosity by changing the trace level from <code>trace1</code> (low
+detail) up to <code>trace8</code> (extreme detail, which shows every
+regex comparison step). For most debugging scenarios,
+<code>trace3</code> or <code>trace5</code> strikes the perfect balance
+between useful information and log readability.</p>
+<h3 id="step-2-locate-and-view-the-log-file">Step 2: Locate and View the
+Log File</h3>
+<p>Because <code>mod_rewrite</code> now hooks into Apache’s standard
+error logging infrastructure, the trace output will be sent directly to
+your defined <code>ErrorLog</code>.</p>
+<p>Once you have saved your configuration changes, restart or reload
+your Apache server to apply them:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart apache2   <span class="co"># Debian/Ubuntu</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart httpd     <span class="co"># CentOS/RHEL</span></span></code></pre></div>
+<p>Next, open your terminal and use the <code>tail</code> command to
+watch the error log in real-time while you refresh the problematic URL
+in your browser:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span> <span class="at">-f</span> /var/log/apache2/error.log <span class="kw">|</span> <span class="fu">grep</span> rewrite</span></code></pre></div>
+<h3 id="step-3-interpret-the-trace-output">Step 3: Interpret the Trace
+Output</h3>
+<p>When you trigger a rewrite rule, the log will output a detailed
+sequence of events. Understanding how to read these lines is key to
+fixing your configuration.</p>
+<p>A typical log entry looks like this:</p>
+<pre class="text"><code>[rewrite:trace3] [pid 1234] mod_rewrite.c(480): [client 192.168.1.50:50321] 192.168.1.50 - - [example.com/sid#7f8c123][rid#7f8c456/initial] applying pattern &#39;^old-path/(.*)&#39; to uri &#39;old-path/page.html&#39;
+[rewrite:trace2] [pid 1234] mod_rewrite.c(480): [client 192.168.1.50:50321] 192.168.1.50 - - [example.com/sid#7f8c123][rid#7f8c456/initial] rewrite &#39;old-path/page.html&#39; -&gt; &#39;new-path/page.html&#39;
+[rewrite:trace1] [pid 1234] mod_rewrite.c(480): [client 192.168.1.50:50321] 192.168.1.50 - - [example.com/sid#7f8c123][rid#7f8c456/initial] internal redirect with /new-path/page.html [INTERNAL REDIRECT]
+</code></pre>
+<p>When analyzing this output, pay close attention to three main
+milestones:</p>
+<ul>
+<li><strong>applying pattern:</strong> This shows the exact regular
+expression Apache is testing and the current string it is testing
+against. If your rule isn’t executing at all, check if the URI matches
+this pattern.</li>
+<li><strong>rewrite:</strong> This line confirms that a pattern match
+was successful and displays how the URI is being transformed
+step-by-step.</li>
+<li><strong>internal redirect / pass through:</strong> This indicates
+what Apache decides to do with the final string, whether it maps it to a
+physical file, passes it to another module, or issues a 301/302 browser
+redirect.</li>
+</ul>
+<h3 id="step-4-clean-up-your-production-environment">Step 4: Clean Up
+Your Production Environment</h3>
+<p>Enabling trace logs creates massive amounts of disk I/O and can
+quickly fill up your server’s storage. Once you have successfully
+diagnosed and fixed your rewrite rules, revert the <code>LogLevel</code>
+back to its default state:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">LogLevel</span><span class="ch"> </span><span class="kw">warn</span></span></code></pre></div>
+<p>Safely reload your server one last time to ensure performance returns
+to normal.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

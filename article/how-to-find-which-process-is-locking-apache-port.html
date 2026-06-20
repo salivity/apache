@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Find Which Process Is Locking Apache Port? - apache</title>
+    <meta name="description" content="When starting or restarting the Apache web server, encountering a "bind: Address already in use" error means another process has already claimed its assigned port (typically port 80 or 443). To resolve this conflict, administrators must identify the rogu">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-find-which-process-is-locking-apache-port">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Find Which Process Is Locking Apache Port? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-find-which-process-is-locking-apache-port" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="When starting or restarting the Apache web server, encountering a "bind: Address already in use" error means another process has already claimed its assigned port (typically port 80 or 443). To resolve this conflict, administrators must identify the rogu" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-find-which-process-is-locking-apache-port">How to Find
+Which Process Is Locking Apache Port?</h1>
+<p>When starting or restarting the Apache web server, encountering a
+“bind: Address already in use” error means another process has already
+claimed its assigned port (typically port 80 or 443). To resolve this
+conflict, administrators must identify the rogue process, analyze its
+impact, and terminate it to free up the network port. This guide covers
+how to use terminal utilities like <code>netstat</code>,
+<code>ss</code>, and <code>lsof</code> on Linux systems to quickly
+locate and stop the process locking your Apache port.</p>
+<h3 id="step-1-identify-the-port-apache-uses">Step 1: Identify the Port
+Apache Uses</h3>
+<p>Before searching for the conflicting process, confirm which port
+Apache is trying to bind to. By default, HTTP uses port 80 and HTTPS
+uses port 443. You can verify your specific configuration by checking
+the Apache configuration files using <code>grep</code>.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-OoP</span> <span class="st">&#39;^Listen \K\d+&#39;</span> /etc/httpd/conf/httpd.conf /etc/apache2/ports.conf</span></code></pre></div>
+<h3 id="step-2-locate-the-conflicting-process">Step 2: Locate the
+Conflicting Process</h3>
+<p>Once you know the port number, use one of the following command-line
+tools to find the Process ID (PID) responsible for the lock. You will
+need <code>sudo</code> or root privileges to see process ownership.</p>
+<h4 id="option-a-using-the-ss-command">Option A: Using the
+<code>ss</code> Command</h4>
+<p>The <code>ss</code> utility is the modern, faster replacement for
+<code>netstat</code> on newer Linux distributions.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ss <span class="at">-lptn</span> <span class="st">&#39;sport = :80&#39;</span></span></code></pre></div>
+<ul>
+<li><code>-l</code>: Displays listening sockets.</li>
+<li><code>-p</code>: Shows the process name and PID.</li>
+<li><code>-t</code>: Displays TCP sockets.</li>
+<li><code>-n</code>: Shows numerical port numbers instead of service
+names.</li>
+</ul>
+<h4 id="option-b-using-the-lsof-command">Option B: Using the
+<code>lsof</code> Command</h4>
+<p>The “List Open Files” command is highly effective for tracking down
+network sockets.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lsof <span class="at">-i</span> :80</span></code></pre></div>
+<p>This command outputs a clean table showing the command name, PID,
+user, and the specific protocol state.</p>
+<h4 id="option-c-using-the-legacy-netstat-command">Option C: Using the
+Legacy <code>netstat</code> Command</h4>
+<p>If you are working on an older system where <code>ss</code> or
+<code>lsof</code> are unavailable, <code>netstat</code> remains a
+reliable alternative.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> netstat <span class="at">-tulnp</span> <span class="kw">|</span> <span class="fu">grep</span> :80</span></code></pre></div>
+<h3 id="step-3-analyze-and-terminate-the-process">Step 3: Analyze and
+Terminate the Process</h3>
+<p>The output from the commands above will reveal a PID (for example,
+<code>1234</code>) and a process name, such as <code>nginx</code>,
+<code>haproxy</code>, or a stray <code>httpd</code> instance.</p>
+<p>Before killing the process, check what it is to ensure you do not
+terminate a critical system service:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ps</span> <span class="at">-fp</span> 1234</span></code></pre></div>
+<p>If the process can be safely closed, use the standard
+<code>kill</code> command. Try a graceful termination first before
+forcing it.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> kill 1234</span></code></pre></div>
+<p>If the process refuses to close, append the <code>-9</code> flag to
+force-kill it:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> kill <span class="at">-9</span> 1234</span></code></pre></div>
+<h3 id="step-4-restart-apache">Step 4: Restart Apache</h3>
+<p>With the port cleared, you can now start or restart your Apache
+service without encountering the address lock error.</p>
+<ul>
+<li><strong>For Ubuntu/Debian:</strong>
+<code>sudo systemctl restart apache2</code></li>
+<li><strong>For CentOS/RHEL:</strong>
+<code>sudo systemctl restart httpd</code></li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Block a Specific User Agent in Apache? - apache</title>
+    <meta name="description" content="Web scrapers, malicious bots, and aggressive AI crawlers can drain your server's bandwidth and compromise your website's security. This article provides a straightforward guide on how to block specific user agents and bots in Apache using both the .htacc">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-block-a-specific-user-agent-in-apache">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Block a Specific User Agent in Apache? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-block-a-specific-user-agent-in-apache" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Web scrapers, malicious bots, and aggressive AI crawlers can drain your server's bandwidth and compromise your website's security. This article provides a straightforward guide on how to block specific user agents and bots in Apache using both the .htacc" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-block-a-specific-user-agent-in-apache">How to Block a
+Specific User Agent in Apache?</h1>
+<p>Web scrapers, malicious bots, and aggressive AI crawlers can drain
+your server’s bandwidth and compromise your website’s security. This
+article provides a straightforward guide on how to block specific user
+agents and bots in Apache using both the <code>.htaccess</code> file and
+the main server configuration. You will learn how to leverage the
+<code>mod_rewrite</code> module to intercept unwanted traffic and return
+a <code>403 Forbidden</code> status code, protecting your server
+resources from unauthorized automated scans.</p>
+<hr />
+<h3 id="prerequisites-enabling-mod_rewrite">Prerequisites: Enabling
+mod_rewrite</h3>
+<p>Before you can block user agents, you must ensure that Apache’s
+rewrite engine is enabled. Most modern web hosting environments have
+this active by default. If you are managing your own server, you can
+enable it via the terminal by running <code>sudo a2enmod rewrite</code>
+and restarting Apache.</p>
+<h3 id="method-1-blocking-bots-using-the-.htaccess-file">Method 1:
+Blocking Bots Using the .htaccess File</h3>
+<p>The most common and flexible way to block a bot is by adding rules to
+your website’s root <code>.htaccess</code> file. This method does not
+require a full server restart and takes effect immediately.</p>
+<p>To block a single bot (for example, a fictional malicious crawler
+named <code>BadBot</code>), add the following lines to your
+<code>.htaccess</code> file:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">RewriteEngine</span><span class="ch"> </span><span class="kw">On</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>RewriteCond<span class="st"> %{HTTP_USER_AGENT} BadBot [NC]</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>RewriteRule<span class="st"> .* - [F,L]</span></span></code></pre></div>
+<p><strong>How this code works:</strong></p>
+<ul>
+<li><strong><code>RewriteEngine On</code></strong>: Initializes the
+rewrite module.</li>
+<li><strong><code>RewriteCond %{HTTP_USER_AGENT}</code></strong>: Tells
+Apache to inspect the incoming User-Agent string sent by the browser or
+bot.</li>
+<li><strong><code>BadBot</code></strong>: The specific text pattern you
+are looking for.</li>
+<li><strong><code>[NC]</code></strong>: Stands for “No Case,” meaning
+the check is case-insensitive (it will catch <code>badbot</code>,
+<code>BadBot</code>, and <code>BADBOT</code>).</li>
+<li><strong><code>RewriteRule .* - [F,L]</code></strong>: Instructs
+Apache to match any requested URL (<code>.*</code>), take no action to
+change the URL (<code>-</code>), and immediately return a <strong>403
+Forbidden</strong> error (<code>[F]</code>) while stopping further rules
+from processing (<code>[L]</code>).</li>
+</ul>
+<h3 id="method-2-blocking-multiple-user-agents-simultaneously">Method 2:
+Blocking Multiple User Agents Simultaneously</h3>
+<p>If you want to block several problematic bots at once, you can chain
+them together using the <code>|</code> (OR) operator inside a single
+regular expression.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">RewriteEngine</span><span class="ch"> </span><span class="kw">On</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>RewriteCond<span class="st"> %{HTTP_USER_AGENT} (BadBot|SpamCrawler|EvilScraper) [NC]</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>RewriteRule<span class="st"> .* - [F,L]</span></span></code></pre></div>
+<p>In this scenario, if an incoming request contains “BadBot”,
+“SpamCrawler”, or “EvilScraper” anywhere within its User-Agent header,
+Apache will deny access.</p>
+<h3 id="method-3-blocking-bots-globally-via-apache-configuration">Method
+3: Blocking Bots Globally via Apache Configuration</h3>
+<p>If you have root access to the server and want to block a bot across
+all websites hosted on that machine, you should place the rules inside
+your main server configuration file (such as <code>httpd.conf</code> or
+<code>apache2.conf</code>) or within the specific VirtualHost block.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;VirtualHost</span><span class="at"> *:80</span><span class="fu">&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    ServerName<span class="st"> yourwebsite.com</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    DocumentRoot<span class="st"> /var/www/html</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="ex">RewriteEngine</span><span class="ch"> </span><span class="kw">On</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    RewriteCond<span class="st"> %{HTTP_USER_AGENT} BadBot [NC]</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    RewriteRule<span class="st"> .* - [F,L]</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/VirtualHost&gt;</span></span></code></pre></div>
+<blockquote>
+<p><strong>Note:</strong> Whenever you make changes directly to the main
+Apache configuration files or VirtualHost blocks, you must restart or
+reload the Apache service for the changes to take effect (e.g.,
+<code>sudo systemctl reload apache2</code>).</p>
+</blockquote>
+<h3 id="testing-your-blocked-user-agent-configuration">Testing Your
+Blocked User Agent Configuration</h3>
+<p>After saving your configuration, you can test if the rule works by
+using the <code>curl</code> command-line tool to spoof your user agent.
+Run the following command from your terminal:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-I</span> <span class="at">-A</span> <span class="st">&quot;BadBot&quot;</span> http://yourwebsite.com</span></code></pre></div>
+<p>If your Apache rules are configured correctly, the server will
+respond with a <strong>403 Forbidden</strong> status code, confirming
+that the bot has been successfully blocked from accessing your
+content.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

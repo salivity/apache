@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Secure an Apache Web Server? - apache</title>
+    <meta name="description" content="Securing an Apache HTTP Server is a critical step in protecting your web applications and user data from malicious attacks. By default, Apache is configured for flexibility and ease of use rather than maximum security. This article provides a comprehensi">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-secure-an-apache-web-server">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Secure an Apache Web Server? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-secure-an-apache-web-server" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Securing an Apache HTTP Server is a critical step in protecting your web applications and user data from malicious attacks. By default, Apache is configured for flexibility and ease of use rather than maximum security. This article provides a comprehensi" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-secure-an-apache-web-server">How to Secure an Apache Web
+Server?</h1>
+<p>Securing an Apache HTTP Server is a critical step in protecting your
+web applications and user data from malicious attacks. By default,
+Apache is configured for flexibility and ease of use rather than maximum
+security. This article provides a comprehensive guide to hardening your
+Apache installation, covering essential practices such as hiding server
+information, disabling unnecessary modules, implementing robust SSL/TLS
+configurations, and configuring protective HTTP headers.</p>
+<h2 id="minimize-information-disclosure">Minimize Information
+Disclosure</h2>
+<p>One of the easiest ways to deter attackers is to limit the amount of
+information your server publicly broadcasts about its software and
+operating system. By default, Apache often reveals its version number
+and modules in error pages and HTTP response headers.</p>
+<ul>
+<li><strong>ServerTokens:</strong> Set this directive to
+<code>Prod</code> (Production). This configures Apache to only return
+“Apache” in the Server response header, concealing the specific version
+number and operating system.</li>
+<li><strong>ServerSignature:</strong> Set this directive to
+<code>Off</code>. This removes the footer line containing the server
+version and host name from server-generated documents, such as 404 error
+pages.</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ServerTokens</span><span class="ch"> </span><span class="kw">Prod</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ServerSignature</span><span class="ch"> </span><span class="kw">Off</span></span></code></pre></div>
+<h2 id="disable-unnecessary-modules-and-features">Disable Unnecessary
+Modules and Features</h2>
+<p>A standard Apache installation includes numerous pre-enabled modules
+and features that you may not actually need. Each active module
+increases the server’s attack surface and consumes system resources.</p>
+<h3 id="turn-off-directory-browsing">Turn Off Directory Browsing</h3>
+<p>If a directory does not contain an index file (like
+<code>index.html</code>), Apache may display a list of all files within
+that directory. This can expose sensitive source code or data
+configuration files. Ensure the <code>Indexes</code> option is disabled
+by adding a minus sign before it.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;Directory</span><span class="at"> /var/www/html</span><span class="fu">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="ex">Options</span><span class="ch"> </span><span class="kw">-Indexes</span><span class="ch"> </span><span class="kw">+FollowSymLinks</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/Directory&gt;</span></span></code></pre></div>
+<h3 id="disable-unused-modules">Disable Unused Modules</h3>
+<p>Review your <code>httpd.conf</code> or module configuration files and
+comment out modules that your applications do not require, such as
+<code>mod_imap</code>, <code>mod_info</code>, <code>mod_userdir</code>,
+or <code>mod_autoindex</code>.</p>
+<h2 id="implement-robust-ssltls-settings">Implement Robust SSL/TLS
+Settings</h2>
+<p>Encrypting data in transit is non-negotiable for modern web security.
+However, simply enabling HTTPS is not enough; you must ensure that your
+configuration uses strong protocols and ciphers.</p>
+<h3 id="enforce-modern-protocols">Enforce Modern Protocols</h3>
+<p>Disable outdated and vulnerable protocols like SSLv2, SSLv3, TLS 1.0,
+and TLS 1.1. Configure Apache to only accept TLS 1.2 and TLS 1.3
+connections.</p>
+<h3 id="optimize-cipher-suites">Optimize Cipher Suites</h3>
+<p>Define a secure list of cipher suites that prioritizes forward
+secrecy and strong encryption algorithms, while explicitly rejecting
+weak ciphers (such as those using RC4 or 3DES).</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">SSLEngine</span><span class="ch"> </span><span class="kw">on</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">SSLProtocol</span><span class="ch"> </span><span class="kw">all</span><span class="ch"> </span><span class="kw">-SSLv3</span><span class="ch"> </span><span class="kw">-TLSv1</span><span class="ch"> </span><span class="kw">-TLSv1</span><span class="ch">.1</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>SSLCipherSuite<span class="st"> HIGH:!aNULL:!MD5:!3DES</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">SSLHonorCipherOrder</span><span class="ch"> </span><span class="kw">on</span></span></code></pre></div>
+<h2 id="configure-security-focused-http-headers">Configure
+Security-Focused HTTP Headers</h2>
+<p>You can instruct user browsers to handle your site’s content more
+securely by implementing specific HTTP response headers. These can be
+added using the <code>mod_headers</code> module.</p>
+<h3 id="http-strict-transport-security-hsts">HTTP Strict Transport
+Security (HSTS)</h3>
+<p>HSTS forces browsers to connect to your website exclusively over
+HTTPS, preventing man-in-the-middle protocol downgrade attacks.</p>
+<h3 id="x-frame-options">X-Frame-Options</h3>
+<p>This header protects your users against clickjacking attacks by
+preventing your site’s content from being embedded into frames or
+iframes on unauthorized external sites.</p>
+<h3 id="content-security-policy-csp">Content Security Policy (CSP)</h3>
+<p>A strong CSP helps mitigate Cross-Site Scripting (XSS) and data
+injection attacks by restricting the origins from which the browser is
+allowed to load resources (such as scripts, images, and
+stylesheets).</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Header<span class="st"> always set Strict-Transport-Security &quot;max-age=63072000; includeSubDomains; preload&quot;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>Header<span class="st"> always set X-Frame-Options &quot;DENY&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>Header<span class="st"> always set X-Content-Type-Options &quot;nosniff&quot;</span></span></code></pre></div>
+<h2 id="protect-the-root-directory-and-restrict-access">Protect the Root
+Directory and Restrict Access</h2>
+<p>Securing the file system structure prevents users from accessing core
+operating system files through the web server. Your default policy
+should be to deny all access to the file system, and then explicitly
+grant access only to the specific directories meant for public
+viewing.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;Directory</span><span class="at"> /</span><span class="fu">&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="ex">AllowOverride</span><span class="ch"> </span><span class="kw">None</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    Require<span class="st"> all denied</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/Directory&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;Directory</span><span class="at"> /var/www/html</span><span class="fu">&gt;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="ex">AllowOverride</span><span class="ch"> </span><span class="kw">None</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    Require<span class="st"> all granted</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/Directory&gt;</span></span></code></pre></div>
+<p>Setting <code>AllowOverride None</code> ensures that users cannot
+bypass your global security configurations using localized
+<code>.htaccess</code> files unless you explicitly permit it for
+specific directories.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

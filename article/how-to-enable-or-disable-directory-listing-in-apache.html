@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Enable or Disable Directory Listing in Apache? - apache</title>
+    <meta name="description" content="Managing directory listing in Apache is a fundamental security configuration that determines whether visitors can see the contents of a folder when no index file (like index.html or index.php) is present. Leaving directory browsing enabled can expose sen">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-enable-or-disable-directory-listing-in-apache">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Enable or Disable Directory Listing in Apache? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-enable-or-disable-directory-listing-in-apache" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing directory listing in Apache is a fundamental security configuration that determines whether visitors can see the contents of a folder when no index file (like index.html or index.php) is present. Leaving directory browsing enabled can expose sen" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-enable-or-disable-directory-listing-in-apache">How to
+Enable or Disable Directory Listing in Apache?</h1>
+<p>Managing directory listing in Apache is a fundamental security
+configuration that determines whether visitors can see the contents of a
+folder when no index file (like <code>index.html</code> or
+<code>index.php</code>) is present. Leaving directory browsing enabled
+can expose sensitive files to the public, while disabling it protects
+your server’s directory structure. This guide provides a straightforward
+walkthrough on how to control this setting using either the main Apache
+configuration file or a local <code>.htaccess</code> file, ensuring your
+web server remains secure and functions exactly as intended.</p>
+<h3 id="understanding-the-options-directive">Understanding the Options
+Directive</h3>
+<p>Apache controls directory indexing using the <code>Options</code>
+directive, specifically through the <code>Indexes</code> token.</p>
+<ul>
+<li>When <code>Indexes</code> is active, Apache automatically generates
+a formatted list of the directory’s contents if an index file is
+missing.</li>
+<li>When <code>Indexes</code> is deactivated, Apache returns a
+<strong>403 Forbidden</strong> error instead of showing the files.</li>
+</ul>
+<hr />
+<h3 id="method-1-editing-the-global-apache-configuration">Method 1:
+Editing the Global Apache Configuration</h3>
+<p>Modifying the main configuration file is the recommended approach if
+you have root access to the server, as it applies changes globally or
+across specific virtual hosts efficiently.</p>
+<ol type="1">
+<li><strong>Open the configuration file:</strong> Depending on your
+operating system, open the primary Apache configuration file using a
+text editor like <code>nano</code>.</li>
+</ol>
+<ul>
+<li><strong>Ubuntu/Debian:</strong>
+<code>/etc/apache2/apache2.conf</code> or
+<code>/etc/apache2/sites-available/000-default.conf</code></li>
+<li><strong>CentOS/RHEL/Fedora:</strong>
+<code>/etc/httpd/conf/httpd.conf</code></li>
+</ul>
+<ol start="2" type="1">
+<li><strong>Locate the Directory block:</strong> Find the
+<code>&lt;Directory&gt;</code> block that corresponds to your website’s
+root path (usually <code>/var/www/html</code> or
+<code>/var/www/</code>).</li>
+<li><strong>Modify the Indexes token:</strong></li>
+</ol>
+<ul>
+<li><strong>To disable directory listing:</strong> Place a minus sign
+(<code>-</code>) directly before <code>Indexes</code>.</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;Directory</span><span class="at"> /var/www/html</span><span class="fu">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="ex">Options</span><span class="ch"> </span><span class="kw">-Indexes</span><span class="ch"> </span><span class="kw">FollowSymLinks</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="ex">AllowOverride</span><span class="ch"> </span><span class="kw">All</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    Require<span class="st"> all granted</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/Directory&gt;</span></span></code></pre></div>
+<ul>
+<li><strong>To enable directory listing:</strong> Place a plus sign
+(<code>+</code>) before <code>Indexes</code>, or simply include the word
+<code>Indexes</code> without a prefix.</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;Directory</span><span class="at"> /var/www/html</span><span class="fu">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="ex">Options</span><span class="ch"> </span><span class="kw">+Indexes</span><span class="ch"> </span><span class="kw">FollowSymLinks</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="ex">AllowOverride</span><span class="ch"> </span><span class="kw">All</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    Require<span class="st"> all granted</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/Directory&gt;</span></span></code></pre></div>
+<ol start="4" type="1">
+<li><strong>Restart Apache:</strong> Save the file and restart the
+Apache service to apply the changes.</li>
+</ol>
+<ul>
+<li><strong>Ubuntu/Debian:</strong>
+<code>sudo systemctl restart apache2</code></li>
+<li><strong>CentOS/RHEL:</strong>
+<code>sudo systemctl restart httpd</code></li>
+</ul>
+<hr />
+<h3 id="method-2-using-an-.htaccess-file">Method 2: Using an .htaccess
+File</h3>
+<p>If you are on a shared hosting environment or do not have root server
+access, you can manage directory listings using an
+<code>.htaccess</code> file located in your website’s root
+directory.</p>
+<ol type="1">
+<li><strong>Create or open the file:</strong> Look for an existing
+<code>.htaccess</code> file in your website’s main folder (e.g.,
+<code>public_html</code>). If it does not exist, create a new plain text
+file and name it exactly <code>.htaccess</code>.</li>
+<li><strong>Add the configuration line:</strong></li>
+</ol>
+<ul>
+<li><strong>To disable directory listing:</strong> Add the following
+line to the file:</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Options</span><span class="ch"> </span><span class="kw">-Indexes</span></span></code></pre></div>
+<ul>
+<li><strong>To enable directory listing:</strong> Add the following line
+to the file:</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Options</span><span class="ch"> </span><span class="kw">+Indexes</span></span></code></pre></div>
+<ol start="3" type="1">
+<li><strong>Save and test:</strong> Save the file. Changes made via
+<code>.htaccess</code> take effect instantly without needing to restart
+the Apache web server, provided that the <code>AllowOverride</code>
+directive is enabled in the main server configuration.</li>
+</ol></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

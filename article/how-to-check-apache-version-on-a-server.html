@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Check Apache Version on a Server - apache</title>
+    <meta name="description" content="Knowing the exact version of your Apache HTTP server is essential for troubleshooting compatibility issues, applying the correct documentation, and maintaining system security. This article provides a quick, step-by-step guide on how to check your curren">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-check-apache-version-on-a-server">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Check Apache Version on a Server - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-check-apache-version-on-a-server" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Knowing the exact version of your Apache HTTP server is essential for troubleshooting compatibility issues, applying the correct documentation, and maintaining system security. This article provides a quick, step-by-step guide on how to check your curren" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-check-apache-version-on-a-server">How to Check Apache
+Version on a Server</h1>
+<p>Knowing the exact version of your Apache HTTP server is essential for
+troubleshooting compatibility issues, applying the correct
+documentation, and maintaining system security. This article provides a
+quick, step-by-step guide on how to check your current Apache version
+across different operating systems—including Linux distributions like
+Ubuntu, Debian, CentOS, and RHEL, as well as Windows—using simple
+command-line interface (CLI) tools.</p>
+<h3 id="checking-apache-version-on-linux">Checking Apache Version on
+Linux</h3>
+<p>On most Linux distributions, you can find the Apache version by using
+the terminal. The exact command depends on how Apache was packaged for
+your specific distribution (often named <code>apache2</code> or
+<code>httpd</code>).</p>
+<ul>
+<li><strong>For Ubuntu and Debian systems:</strong> Open your terminal
+and type the following command, then press Enter:
+<code>apache2 -v</code> Alternatively, you can use the longer version
+for more detailed information, including build parameters:
+<code>apache2 -V</code></li>
+<li><strong>For CentOS, RHEL, and Fedora systems:</strong> These
+distributions typically refer to Apache as <code>httpd</code>. Run this
+command in your terminal: <code>httpd -v</code> For the extended
+configuration and build details, use: <code>httpd -V</code></li>
+</ul>
+<p>If you do not have root or sudo privileges, or if the Apache binary
+is not in your system’s default PATH, these standard commands might
+return an error. In such cases, you can look up the package manager info
+directly:</p>
+<ul>
+<li>On Ubuntu/Debian: <code>apache2 -v</code> or
+<code>apt policy apache2</code></li>
+<li>On CentOS/RHEL: <code>rpm -qa | grep httpd</code></li>
+</ul>
+<h3 id="checking-apache-version-on-windows">Checking Apache Version on
+Windows</h3>
+<p>If you are running Apache on a Windows environment (either as a
+standalone installation or through bundles like XAMPP or WampServer),
+you can check the version using the Command Prompt.</p>
+<ol type="1">
+<li>Open the Windows Command Prompt (<code>cmd</code>).</li>
+<li>Navigate to the <code>bin</code> directory of your Apache
+installation using the <code>cd</code> command. For example:
+<code>cd C:\xampp\apache\bin</code></li>
+<li>Execute the Apache version command: <code>httpd -v</code></li>
+</ol>
+<h3 id="checking-version-via-a-web-browser">Checking Version via a Web
+Browser</h3>
+<p>If you do not have command-line access to the server, you can
+sometimes find the version information using a web browser, provided the
+server configuration allows it.</p>
+<ul>
+<li><strong>Server Signature:</strong> By default, many Apache
+installations display the server version at the bottom of automatically
+generated pages, such as a “404 Not Found” error page or the default
+index directory listing.</li>
+<li><strong>Developer Tools:</strong> You can inspect the HTTP response
+headers sent by your server. Open your browser’s Developer Tools (F12),
+go to the <strong>Network</strong> tab, refresh the page, and click on
+the first request. Look for the <code>Server</code> header under the
+response headers section, which often displays something like
+<code>Server: Apache/2.4.58 (Unix)</code>.</li>
+</ul></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

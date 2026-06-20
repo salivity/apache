@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why Does AllowOverride Slow Down Apache Performance? - apache</title>
+    <meta name="description" content="Using the AllowOverride directive in Apache allows .htaccess files to override system-wide configurations on a per-directory basis. While this offers immense flexibility, especially in shared hosting environments, enabling it too broadly severely degrade">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/why-does-allowoverride-slow-down-apache-performance">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Why Does AllowOverride Slow Down Apache Performance? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/why-does-allowoverride-slow-down-apache-performance" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Using the AllowOverride directive in Apache allows .htaccess files to override system-wide configurations on a per-directory basis. While this offers immense flexibility, especially in shared hosting environments, enabling it too broadly severely degrade" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="why-does-allowoverride-slow-down-apache-performance">Why Does
+AllowOverride Slow Down Apache Performance?</h1>
+<p>Using the <code>AllowOverride</code> directive in Apache allows
+<code>.htaccess</code> files to override system-wide configurations on a
+per-directory basis. While this offers immense flexibility, especially
+in shared hosting environments, enabling it too broadly severely
+degrades server speed. This article explores how
+<code>AllowOverride</code> impacts Apache’s processing efficiency,
+explains the hidden file-system overhead it introduces, and provides
+actionable alternatives to restore optimal server performance.</p>
+<hr />
+<h3 id="the-hidden-performance-cost-of-.htaccess-searching">The Hidden
+Performance Cost of .htaccess Searching</h3>
+<p>When you set <code>AllowOverride All</code> (or any directive other
+than <code>None</code>), you instruct Apache to look for
+<code>.htaccess</code> files to check for localized configuration
+changes. The catch is that Apache does not just look in the target
+directory; it recursively searches every parent directory in the file
+path.</p>
+<p>For example, if a user requests a file located at
+<code>/var/www/html/site/public/index.html</code>, and
+<code>AllowOverride</code> is enabled for that path, Apache must check
+for the existence of security and configuration files in the following
+locations:</p>
+<ul>
+<li><code>/var/www/.htaccess</code></li>
+<li><code>/var/www/html/.htaccess</code></li>
+<li><code>/var/www/html/site/.htaccess</code></li>
+<li><code>/var/www/html/site/public/.htaccess</code></li>
+</ul>
+<h3 id="file-system-overhead-and-decreased-throughput">File System
+Overhead and Decreased Throughput</h3>
+<p>Every single check Apache performs requires a file system
+<code>stat()</code> call to see if the <code>.htaccess</code> file
+exists, followed by an open and read operation if it does.</p>
+<ul>
+<li><strong>Multiplied Latency:</strong> If your website requires
+loading dozens of assets (images, CSS, JavaScript) per page load, Apache
+repeats this recursive directory search for <em>every single
+asset</em>.</li>
+<li><strong>High Disk I/O:</strong> On high-traffic websites, these
+thousands of unnecessary file system checks trigger massive disk I/O
+bottlenecks. Even with modern SSDs and OS file caching, this
+architectural overhead noticeably delays the Time to First Byte
+(TTFB).</li>
+</ul>
+<h3 id="security-and-administrative-downsides">Security and
+Administrative Downsides</h3>
+<p>Beyond pure speed, relying heavily on <code>AllowOverride</code>
+exposes your server to secondary risks:</p>
+<ul>
+<li><strong>Security Vulnerabilities:</strong> Allowing local users to
+modify server configurations can lead to unauthorized access or server
+misconfigurations if a localized <code>.htaccess</code> file is
+compromised.</li>
+<li><strong>Cache Invalidation:</strong> Because <code>.htaccess</code>
+files can change at any moment without a server restart, Apache cannot
+permanently cache the directory configurations, forcing it to evaluate
+the file system on every request.</li>
+</ul>
+<h3 id="optimizing-apache-the-best-alternative">Optimizing Apache: The
+Best Alternative</h3>
+<p>The most effective way to boost Apache speed is to disable this
+feature entirely and centralize your configurations.</p>
+<ol type="1">
+<li><strong>Set AllowOverride to None:</strong> Open your main Apache
+configuration file (e.g., <code>httpd.conf</code> or
+<code>apache2.conf</code>) and update your directory settings:</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;Directory</span><span class="at"> /var/www/</span><span class="fu">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="ex">AllowOverride</span><span class="ch"> </span><span class="kw">None</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/Directory&gt;</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Move Rules to the Main Configuration:</strong> Take any
+directives currently living inside your <code>.htaccess</code> files
+(such as URL rewrites or access controls) and place them directly inside
+a <code>&lt;Directory&gt;</code> block within your main server
+configuration or virtual host file.</li>
+</ol>
+<p>By shifting these rules to the main configuration, Apache loads them
+into memory exactly once during startup. It no longer needs to scan the
+hard drive for every incoming web request, resulting in a dramatic,
+immediate increase in page loading speeds.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

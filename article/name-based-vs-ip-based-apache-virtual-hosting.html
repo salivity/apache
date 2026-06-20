@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Name-Based vs IP-Based Apache Virtual Hosting - apache</title>
+    <meta name="description" content="This article provides a clear comparison between name-based and IP-based virtual hosting in the Apache HTTP Server. It explores how each method handles multiple websites on a single server, examines their core operational differences, and outlines the sp">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/name-based-vs-ip-based-apache-virtual-hosting">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Name-Based vs IP-Based Apache Virtual Hosting - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/name-based-vs-ip-based-apache-virtual-hosting" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides a clear comparison between name-based and IP-based virtual hosting in the Apache HTTP Server. It explores how each method handles multiple websites on a single server, examines their core operational differences, and outlines the sp" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="name-based-vs-ip-based-apache-virtual-hosting">Name-Based vs
+IP-Based Apache Virtual Hosting</h1>
+<p>This article provides a clear comparison between name-based and
+IP-based virtual hosting in the Apache HTTP Server. It explores how each
+method handles multiple websites on a single server, examines their core
+operational differences, and outlines the specific scenarios where one
+approach outperforms the other.</p>
+<hr />
+<h3 id="understanding-virtual-hosting-in-apache">Understanding Virtual
+Hosting in Apache</h3>
+<p>Virtual hosting is a method that allows a single Apache web server to
+host multiple domains or websites (such as <code>example1.com</code> and
+<code>example2.com</code>) simultaneously. Instead of requiring a
+dedicated physical server for every single website, administrators can
+leverage virtual hosting to share system resources efficiently. Apache
+primarily achieves this through two different mechanisms:
+<strong>Name-Based</strong> and <strong>IP-Based</strong> virtual
+hosting.</p>
+<hr />
+<h3 id="what-is-name-based-virtual-hosting">What is Name-Based Virtual
+Hosting?</h3>
+<p>Name-Based virtual hosting allows a server to host multiple websites
+on a <strong>single IP address</strong>.</p>
+<p>When a user requests a website, the browser connects to the server’s
+IP address. To distinguish which website the user wants to see, Apache
+looks at the HTTP request header sent by the browser—specifically, the
+<strong>Host header</strong>.</p>
+<ul>
+<li><strong>How it works:</strong> The DNS records for all hosted
+domains point to the exact same IP address. When Apache receives the
+incoming traffic, it reads the Host header (e.g.,
+<code>Host: example1.com</code>) and routes the user to the correct
+directory.</li>
+<li><strong>Pros:</strong> Highly resource-efficient. You do not need to
+purchase multiple IP addresses, which conserves scarce IPv4 space and
+keeps hosting costs low.</li>
+<li><strong>Cons:</strong> Historically faced compatibility issues with
+SSL/TLS configuration, though modern implementation of Server Name
+Indication (SNI) has largely resolved this limitation.</li>
+</ul>
+<hr />
+<h3 id="what-is-ip-based-virtual-hosting">What is IP-Based Virtual
+Hosting?</h3>
+<p>IP-Based virtual hosting requires a <strong>unique IP
+address</strong> for every single website configured on the server.</p>
+<p>Instead of relying on the HTTP header to determine the destination,
+the server distinguishes between websites based on the specific IP
+address the request was sent to. The physical server must be configured
+with multiple network interfaces or virtual IP addresses (IP
+aliasing).</p>
+<ul>
+<li><strong>How it works:</strong> The DNS record for
+<code>example1.com</code> points to IP <code>192.0.2.1</code>, while
+<code>example2.com</code> points to IP <code>192.0.2.2</code>. Apache
+listens to both IPs and serves the corresponding website files depending
+on which IP received the traffic.</li>
+<li><strong>Pros:</strong> Offers excellent isolation. Since each site
+has its own dedicated IP, it is easier to implement dedicated SSL
+certificates without relying on SNI, run services on different ports per
+site, or isolate traffic for security and bandwidth monitoring.</li>
+<li><strong>Cons:</strong> Expensive and wasteful. Acquiring multiple
+IPv4 addresses is costly and administratively inefficient for basic
+websites.</li>
+</ul>
+<hr />
+<h3 id="key-differences-at-a-glance">Key Differences At a Glance</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Name-Based Virtual Hosting</th>
+<th>IP-Based Virtual Hosting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IP Addresses Required</strong></td>
+<td>One single IP address for all sites.</td>
+<td>A unique IP address for every site.</td>
+</tr>
+<tr>
+<td><strong>How Apache Identifies Sites</strong></td>
+<td>Uses the HTTP <code>Host</code> header.</td>
+<td>Uses the destination IP address.</td>
+</tr>
+<tr>
+<td><strong>Resource Efficiency</strong></td>
+<td>Extremely high; conserves IP space.</td>
+<td>Low; requires multiple IPs.</td>
+</tr>
+<tr>
+<td><strong>DNS Configuration</strong></td>
+<td>All domains map to one IP.</td>
+<td>Each domain maps to a different IP.</td>
+</tr>
+<tr>
+<td><strong>Best Used For</strong></td>
+<td>General web hosting, blogs, and standard corporate sites.</td>
+<td>Legacy SSL support, dedicated bandwidth monitoring, and strict
+security isolation.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="which-one-should-you-choose">Which One Should You Choose?</h3>
+<p>For the vast majority of modern web applications and sites,
+<strong>Name-Based virtual hosting</strong> is the standard and
+preferred choice. It drastically reduces administrative overhead and
+eliminates the costs associated with acquiring multiple IP
+addresses.</p>
+<p><strong>IP-Based virtual hosting</strong> should be reserved for
+specialized use cases. You might choose it if you need to run a site
+that requires a dedicated IP for regulatory compliance, if you are
+configuring complex firewalls that filter traffic by specific IP
+destinations, or if you need to support ancient legacy browsers that
+lack SNI compatibility for encrypted connections.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

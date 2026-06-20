@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure Basic Auth in Apache? - apache</title>
+    <meta name="description" content="Setting up basic authentication in the Apache HTTP Server is a straightforward method for securing sensitive directories or files on your website by requiring a username and password. This article provides a step-by-step guide on how to create a password">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-configure-basic-auth-in-apache">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure Basic Auth in Apache? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-configure-basic-auth-in-apache" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Setting up basic authentication in the Apache HTTP Server is a straightforward method for securing sensitive directories or files on your website by requiring a username and password. This article provides a step-by-step guide on how to create a password" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-configure-basic-auth-in-apache">How to Configure Basic
+Auth in Apache?</h1>
+<p>Setting up basic authentication in the Apache HTTP Server is a
+straightforward method for securing sensitive directories or files on
+your website by requiring a username and password. This article provides
+a step-by-step guide on how to create a password file using the
+<code>htpasswd</code> utility, configure your Apache configuration file
+or a <code>.htaccess</code> file to enforce restrictions, and restart
+the server to apply the changes. By following these instructions, you
+can quickly implement a foundational layer of security for your web
+applications.</p>
+<hr />
+<h3 id="step-1-create-the-password-file">Step 1: Create the Password
+File</h3>
+<p>The first step in implementing basic authentication is creating a
+secure file that stores the authorized usernames and their encrypted
+passwords. Apache includes a dedicated tool for this called
+<code>htpasswd</code>.</p>
+<p>Run the following command in your terminal to create the file and add
+your first user. You should store this file outside of your web root
+directory so it cannot be accessed via a web browser.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> htpasswd <span class="at">-c</span> /etc/apache2/.htpasswd username</span></code></pre></div>
+<ul>
+<li>The <code>-c</code> flag tells the utility to
+<strong>create</strong> a new file. Only use this flag for the very
+first user; omitting it allows you to append additional users to the
+same file later.</li>
+<li>Replace <code>username</code> with the actual username you want to
+grant access to.</li>
+<li>You will be prompted to enter and confirm a secure password for the
+user.</li>
+</ul>
+<hr />
+<h3 id="step-2-configure-apache-for-authentication">Step 2: Configure
+Apache for Authentication</h3>
+<p>Now that your password file is ready, you need to tell Apache which
+directory or files require these credentials to grant access. You can
+configure this either in your main Apache configuration file (or virtual
+host file) or within a <code>.htaccess</code> file located in the
+directory you want to protect.</p>
+<p>Open your configuration file and add the following block of
+directives, adjusting the directory path to match your setup:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;Directory</span><span class="at"> &quot;/var/www/html/protected-folder&quot;</span><span class="fu">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="ex">AuthType</span><span class="ch"> </span><span class="kw">Basic</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    AuthName<span class="st"> &quot;Restricted Access - Please Log In&quot;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    AuthUserFile<span class="st"> /etc/apache2/.htpasswd</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    Require<span class="st"> valid-user</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/Directory&gt;</span></span></code></pre></div>
+<p>Here is what each directive means:</p>
+<ul>
+<li><strong>AuthType Basic</strong>: Specifies that you are using the
+basic HTTP authentication method.</li>
+<li><strong>AuthName</strong>: The message or realm name displayed to
+the user in the login prompt pop-up window.</li>
+<li><strong>AuthUserFile</strong>: The absolute file system path to the
+password file you created in Step 1.</li>
+<li><strong>Require valid-user</strong>: Ensures that any user listed in
+the password file who provides a correct password can gain access.</li>
+</ul>
+<hr />
+<h3 id="step-3-test-and-restart-apache">Step 3: Test and Restart
+Apache</h3>
+<p>Before applying the changes to a live server, it is best practice to
+test your configuration files for any syntax errors.</p>
+<p>Run the following command to test your setup:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apache2ctl configtest</span></code></pre></div>
+<p>If the output returns <code>Syntax OK</code>, you can safely restart
+the Apache service to load the new authentication rules:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl restart apache2</span></code></pre></div>
+<p>Once restarted, navigating to the protected directory through any web
+browser will immediately trigger a prompt asking for the username and
+password you configured.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

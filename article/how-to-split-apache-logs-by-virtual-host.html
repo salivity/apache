@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Split Apache Logs by Virtual Host? - apache</title>
+    <meta name="description" content="Managing multiple websites on a single Apache server often results in a cluttered, single access log file that combines traffic from every domain. This article provides a straightforward guide on how to configure Apache to automatically separate access l">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-split-apache-logs-by-virtual-host">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js" defer></script>
+    <script id="MathJax-script" src="/apache/js/mathjax.min.js" async></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Split Apache Logs by Virtual Host? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-split-apache-logs-by-virtual-host" />
+    <meta property="og:image:url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Managing multiple websites on a single Apache server often results in a cluttered, single access log file that combines traffic from every domain. This article provides a straightforward guide on how to configure Apache to automatically separate access l" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="https://github.com/salivity" title="Github" aria-label="Go To Github Profile Page"><svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"></path></svg></a></li>
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <article><h1 id="how-to-split-apache-logs-by-virtual-host">How to Split Apache
+Logs by Virtual Host?</h1>
+<p>Managing multiple websites on a single Apache server often results in
+a cluttered, single access log file that combines traffic from every
+domain. This article provides a straightforward guide on how to
+configure Apache to automatically separate access logs for each virtual
+host. We will cover the two primary methods: using the
+<code>CustomLog</code> directive directly within individual VirtualHost
+blocks, and using the <code>LogFormat</code> directive alongside the
+<code>rotatelogs</code> utility to split a combined log dynamically.</p>
+<h3 id="method-1-the-virtualhost-directive-method">Method 1: The
+VirtualHost Directive Method</h3>
+<p>The most common and straightforward way to separate your logs is by
+defining a unique <code>CustomLog</code> path inside each specific
+<code>&lt;VirtualHost&gt;</code> configuration block. This tells Apache
+exactly where to send the traffic data for that specific domain.</p>
+<ol type="1">
+<li>Open your Apache configuration file for the specific website
+(usually located in <code>/etc/apache2/sites-available/</code> on
+Ubuntu/Debian or <code>/etc/httpd/conf.d/</code> on CentOS/RHEL).</li>
+<li>Locate the <code>&lt;VirtualHost&gt;</code> block for your
+domain.</li>
+<li>Add or modify the <code>CustomLog</code> directive inside that
+block, specifying a unique filename.</li>
+</ol>
+<p>Here is an example of how your configuration blocks should look:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;VirtualHost</span><span class="at"> *:80</span><span class="fu">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    ServerName<span class="st"> example.com</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    ServerAlias<span class="st"> www.example.com</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    DocumentRoot<span class="st"> /var/www/example</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Separate log for example.com</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    ErrorLog<span class="st"> ${APACHE_LOG_DIR}/example.com-error.log</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    CustomLog<span class="st"> ${APACHE_LOG_DIR}/example.com-access.log combined</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/VirtualHost&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;VirtualHost</span><span class="at"> *:80</span><span class="fu">&gt;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    ServerName<span class="st"> anothersite.org</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    DocumentRoot<span class="st"> /var/www/anothersite</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Separate log for anothersite.org</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    ErrorLog<span class="st"> ${APACHE_LOG_DIR}/anothersite.org-error.log</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    CustomLog<span class="st"> ${APACHE_LOG_DIR}/anothersite.org-access.log combined</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/VirtualHost&gt;</span></span></code></pre></div>
+<p>After saving the files, test your configuration with
+<code>apachectl configtest</code> and restart Apache to apply the
+changes.</p>
+<h3 id="method-2-the-conditionaldynamic-log-method">Method 2: The
+Conditional/Dynamic Log Method</h3>
+<p>If you manage dozens of virtual hosts and do not want to hardcode log
+paths for every single one, you can log everything to one master file
+but include the hostname in the log format. You can then use an
+environment variable or a piping script to split them automatically.</p>
+<p>First, ensure your <code>LogFormat</code> includes the virtual host
+nickname (<code>%v</code>). Apache usually includes a pre-defined format
+for this called <code>vhost_combined</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>LogFormat<span class="st"> &quot;%v:%p %h %l %u %t \&quot;%r\&quot; %&gt;s %O \&quot;%{Referer}i\&quot; \&quot;%{User-Agent}i\&quot;&quot; vhost_combined</span></span></code></pre></div>
+<p>You can then pipe the global log through Apache’s built-in
+<code>rotatelogs</code> tool or a tool like <code>split-logfile</code>
+to automatically parse the <code>%v</code> prefix and generate separate
+files on the fly:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>CustomLog<span class="st"> &quot;|/usr/bin/rotatelogs /var/log/apache2/vhost-logs/%Y-%m-%d-access.log&quot; vhost_combined</span></span></code></pre></div>
+<h3 id="verification-and-best-practices">Verification and Best
+Practices</h3>
+<p>Regardless of the method you choose, always verify that the Apache
+user (usually <code>www-data</code> or <code>apache</code>) has the
+correct write permissions for the directories where the new log files
+will be created. Additionally, remember to update your server’s log
+rotation configuration (such as <code>logrotate</code>) to ensure these
+new, individual log files are compressed and archived correctly over
+time, preventing your server’s hard drive from filling up.</p></article>
+        <div id=comments-container></div>
+
+        <script>
+            const utterancesScript = document.createElement('script');
+            
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            utterancesScript.setAttribute('theme', localStorage.getItem('theme') === 'light' ? 'github-light' : 'github-dark'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
