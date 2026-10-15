@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Does Apache mod_evasive Protect Against DDoS? - apache</title>
+    <meta name="description" content="Apache modevasive is an open-source module designed to protect web servers from Distributed Denial of Service (DDoS), Denial of Service (DoS), and brute-force attacks. It accomplishes this by monitoring incoming requests and temporarily blocking IP addres">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-does-apache-mod-evasive-protect-against-d-do-s">
+    <link rel="search" type="application/opensearchdescription+xml" title="apache" href="/apache/opensearch.xml">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <link media="print" rel="stylesheet" href="/apache/css/print.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How Does Apache mod_evasive Protect Against DDoS? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-does-apache-mod-evasive-protect-against-d-do-s" />
+    <meta property="og:image" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Apache modevasive is an open-source module designed to protect web servers from Distributed Denial of Service (DDoS), Denial of Service (DoS), and brute-force attacks. It accomplishes this by monitoring incoming requests and temporarily blocking IP addres" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-does-apache-mod_evasive-protect-against-ddos">How Does
+Apache mod_evasive Protect Against DDoS?</h1>
+<p>Apache <code>mod_evasive</code> is an open-source module designed to
+protect web servers from Distributed Denial of Service (DDoS), Denial of
+Service (DoS), and brute-force attacks. It accomplishes this by
+monitoring incoming requests and temporarily blocking IP addresses that
+exceed predefined thresholds for page requests or concurrent
+connections. By detecting and mitigating these traffic spikes at the web
+server layer, <code>mod_evasive</code> prevents malicious traffic from
+depleting server resources, ensuring that legitimate users retain access
+to the website.</p>
+<h3 id="how-mod_evasive-detects-malicious-traffic">How mod_evasive
+Detects Malicious Traffic</h3>
+<p>The module relies on an internal dynamic hash table to track IP
+addresses and their request patterns. It evaluates incoming traffic
+against three main criteria:</p>
+<ul>
+<li><strong>Page Request Thresholds:</strong> Requesting the same page
+too many times per second.</li>
+<li><strong>Site-Wide Request Thresholds:</strong> Requesting too many
+different pages across the entire site per second.</li>
+<li><strong>Concurrent Connections:</strong> Initiating too many
+simultaneous connections from a single source.</li>
+</ul>
+<p>If an IP address breaches any of these configured limits,
+<code>mod_evasive</code> flags the behavior as a potential attack and
+immediately triggers its defensive mechanisms.</p>
+<h3 id="the-mitigation-process">The Mitigation Process</h3>
+<p>Once an IP address is flagged, <code>mod_evasive</code> takes
+immediate action to protect the Apache server:</p>
+<ul>
+<li><strong>403 Forbidden Response:</strong> The module intercepts
+requests from the offending IP and returns a <code>403 Forbidden</code>
+error. This consumes significantly less bandwidth and processing power
+than serving a standard webpage.</li>
+<li><strong>IP Blacklisting:</strong> The IP is added to a temporary
+internal blacklist. The duration of this block is configurable via a
+blocking period timer.</li>
+<li><strong>Timer Reset on Persistent Attacks:</strong> If the attacking
+IP continues to flood the server while blocked, <code>mod_evasive</code>
+resets the blocking timer, extending the ban until the malicious traffic
+subsides.</li>
+<li><strong>System Notifications:</strong> The module can be configured
+to log the event via system logs (syslog) or send an automated email
+notification to the system administrator, providing details about the
+source IP and the nature of the attack.</li>
+</ul>
+<h3 id="core-configuration-directives">Core Configuration
+Directives</h3>
+<p>Administrators can fine-tune <code>mod_evasive</code> through
+specific directives in the Apache configuration file to balance security
+and user experience:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Directive</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DOSPageCount</strong></td>
+<td>The maximum number of requests for the same page allowed within the
+<code>DOSPageInterval</code>.</td>
+</tr>
+<tr>
+<td><strong>DOSSiteCount</strong></td>
+<td>The total number of requests allowed across the entire website
+within the <code>DOSSiteInterval</code>.</td>
+</tr>
+<tr>
+<td><strong>DOSPageInterval</strong></td>
+<td>The time window (in seconds) used to measure the page request
+threshold.</td>
+</tr>
+<tr>
+<td><strong>DOSSiteInterval</strong></td>
+<td>The time window (in seconds) used to measure the total site request
+threshold.</td>
+</tr>
+<tr>
+<td><strong>DOSBlockingPeriod</strong></td>
+<td>The duration (in seconds) for which an offending IP address will be
+blocked.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="limitations-and-best-practices">Limitations and Best
+Practices</h3>
+<p>While <code>mod_evasive</code> is an effective tool for mitigating
+smaller, application-layer DoS attacks and script-driven brute-force
+attempts, it has limitations against massive, highly distributed
+volumetric DDoS attacks that can saturate network bandwidth before
+reaching the web server. Because it operates at the software level, it
+still utilizes some server CPU and memory to reject requests. For
+comprehensive security, it is best utilized as a first line of
+host-based defense alongside network-level firewalls, intrusion
+prevention systems, and reverse-proxy Content Delivery Networks
+(CDNs).</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

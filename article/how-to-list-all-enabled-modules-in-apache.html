@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to List All Enabled Modules in Apache? - apache</title>
+    <meta name="description" content="This guide provides a quick and direct overview of how to check which modules are currently enabled in your Apache web server. Whether you are troubleshooting a server configuration, verifying a new installation, or conducting a security audit, knowing ho">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-list-all-enabled-modules-in-apache">
+    <link rel="search" type="application/opensearchdescription+xml" title="apache" href="/apache/opensearch.xml">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <link media="print" rel="stylesheet" href="/apache/css/print.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to List All Enabled Modules in Apache? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-list-all-enabled-modules-in-apache" />
+    <meta property="og:image" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This guide provides a quick and direct overview of how to check which modules are currently enabled in your Apache web server. Whether you are troubleshooting a server configuration, verifying a new installation, or conducting a security audit, knowing ho" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-list-all-enabled-modules-in-apache">How to List All
+Enabled Modules in Apache?</h1>
+<p>This guide provides a quick and direct overview of how to check which
+modules are currently enabled in your Apache web server. Whether you are
+troubleshooting a server configuration, verifying a new installation, or
+conducting a security audit, knowing how to list active modules is an
+essential skill for server administration. Depending on your operating
+system—whether you are using a Debian-based system like Ubuntu or a Red
+Hat-based system like CentOS—Apache offers built-in command-line tools
+to display this information instantly.</p>
+<h3 id="using-the-apache-control-command-apachectl">Using the Apache
+Control Command (apachectl)</h3>
+<p>The most universal method to list enabled Apache modules across
+almost all Linux distributions is using the <code>apachectl</code>
+command. This tool acts as a front-end to the Apache HTTP server
+engine.</p>
+<p>To see all loaded modules, open your terminal and run the following
+command:</p>
+<p><code>apachectl -M</code></p>
+<p>Alternatively, you can use the <code>apache2ctl</code> command on
+Debian and Ubuntu systems:</p>
+<p><code>apache2ctl -M</code></p>
+<p>Both commands will output a complete list of all loaded modules,
+categorized into static modules (compiled directly into the binary) and
+shared modules (loaded dynamically via configuration files).</p>
+<h3 id="using-the-httpd-command">Using the HTTPD Command</h3>
+<p>On Red Hat Enterprise Linux (RHEL), CentOS, Fedora, and Rocky Linux,
+the Apache service is known as <code>httpd</code>. You can query the
+binary directly to list the enabled modules.</p>
+<p>Run the following command in your terminal:</p>
+<p><code>httpd -M</code></p>
+<p>If you need to check for a specific module within a long list, you
+can pipe the output into the <code>grep</code> command. For example, to
+check if the rewrite module is active, use:</p>
+<p><code>httpd -M | grep rewrite</code></p>
+<h3 id="checking-via-debianubuntu-configuration-files">Checking via
+Debian/Ubuntu Configuration Files</h3>
+<p>On Debian-based systems, Apache manages modules using a symlink
+system. Enabled modules are stored as symbolic links in a specific
+directory. You can list the contents of this directory to see what is
+currently active without running the Apache binary.</p>
+<p>Run the following command to view the enabled modules directory:</p>
+<p><code>ls -l /etc/apache2/mods-enabled/</code></p>
+<p>Every <code>.load</code> file present in this directory represents an
+Apache module that is currently active and will be loaded the next time
+the web server restarts.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

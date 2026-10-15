@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is the Apache AllowOverride Directive? - apache</title>
+    <meta name="description" content="The AllowOverride directive in the Apache HTTP Server configuration determines which configuration directives declared in a .htaccess file can override the main server configuration. When a client requests a file, Apache looks for a .htaccess file in the">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/what-is-the-apache-allow-override-directive">
+    <link rel="search" type="application/opensearchdescription+xml" title="apache" href="/apache/opensearch.xml">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <link media="print" rel="stylesheet" href="/apache/css/print.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="What is the Apache AllowOverride Directive? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/what-is-the-apache-allow-override-directive" />
+    <meta property="og:image" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="The AllowOverride directive in the Apache HTTP Server configuration determines which configuration directives declared in a .htaccess file can override the main server configuration. When a client requests a file, Apache looks for a .htaccess file in the" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="what-is-the-apache-allowoverride-directive">What is the Apache
+AllowOverride Directive?</h1>
+<p>The <code>AllowOverride</code> directive in the Apache HTTP Server
+configuration determines which configuration directives declared in a
+<code>.htaccess</code> file can override the main server configuration.
+When a client requests a file, Apache looks for a <code>.htaccess</code>
+file in the target directory and its parent directories. By default, or
+when explicitly configured, <code>AllowOverride</code> dictates whether
+the server should process these local files at all, and if so, which
+categories of directives (such as security, indexing, or performance
+tweaks) are permitted to take effect.</p>
+<h2 id="understanding-the-purpose-of-allowoverride">Understanding the
+Purpose of AllowOverride</h2>
+<p>In Apache, global configurations are typically managed in centralized
+files like <code>httpd.conf</code> or <code>apache2.conf</code>.
+However, web administrators often need to grant localized control over
+specific directories, especially in shared hosting environments. This is
+where <code>.htaccess</code> files come into play.</p>
+<p>The <code>AllowOverride</code> directive acts as a security
+gatekeeper. It is placed within a <code>&lt;Directory&gt;</code> block
+in the main configuration file to tell Apache exactly how much control
+to hand over to the <code>.htaccess</code> files in that specific file
+path.</p>
+<h3 id="key-syntax-and-arguments">Key Syntax and Arguments</h3>
+<p>The directive follows a simple syntax structure:</p>
+<p><code>AllowOverride [All | None | Directive-Type]</code></p>
+<ul>
+<li><strong>None</strong>: The server will completely ignore
+<code>.htaccess</code> files in the specified directory. This is highly
+recommended for security and performance if you do not explicitly need
+per-directory overrides.</li>
+<li><strong>All</strong>: Any directive that has an ".htaccess context"
+is allowed to be used in the <code>.htaccess</code> file.</li>
+<li><strong>Directive-Type</strong>: You can specify a space-separated
+list of specific directive categories to allow. Common categories
+include:</li>
+<li><code>AuthConfig</code>: Allows authorization directives (e.g.,
+<code>AuthUserFile</code>, <code>Require</code>).</li>
+<li><code>FileInfo</code>: Allows directives controlling document types
+and metadata (e.g., <code>ErrorDocument</code>,
+<code>RewriteEngine</code>).</li>
+<li><code>Indexes</code>: Allows directives controlling directory
+indexing (e.g., <code>Options</code>, <code>IndexIgnore</code>).</li>
+<li><code>Limit</code>: Allows directives controlling host access (e.g.,
+<code>Allow</code>, <code>Deny</code>, <code>Order</code>).</li>
+<li><code>Options[=option,...]</code>: Allows use of specific directory
+options (e.g., <code>ExecCGI</code>, <code>FollowSymLinks</code>).</li>
+</ul>
+<h2 id="impact-on-performance-and-security">Impact on Performance and
+Security</h2>
+<p>Configuring <code>AllowOverride</code> correctly is a critical aspect
+of Apache web server management, impacting both how fast your site loads
+and how secure it remains against unauthorized access.</p>
+<h3 id="performance-considerations">Performance Considerations</h3>
+<p>Setting <code>AllowOverride All</code> or enabling specific directive
+types forces Apache to look for <code>.htaccess</code> files in every
+higher-level directory leading down to the requested file. For example,
+if a file is requested from <code>/var/www/html/images/</code> and
+overrides are enabled, Apache must check for <code>.htaccess</code>
+files in <code>/</code>, <code>/var/</code>, <code>/var/www/</code>,
+<code>/var/www/html/</code>, and <code>/var/www/html/images/</code>.
+This continuous file-system scanning adds a layer of latency to every
+single request. Setting <code>AllowOverride None</code> eliminates this
+overhead entirely, boosting server speed.</p>
+<h3 id="security-implications">Security Implications</h3>
+<p>Allowing users to modify configuration settings via
+<code>.htaccess</code> can expose the server to vulnerabilities. If a
+malicious actor gains access to a user directory, they could potentially
+alter URL rewriting rules, bypass authentication mechanisms, or execute
+arbitrary scripts by changing file handling directives. Restricting
+<code>AllowOverride</code> to <code>None</code> by default and only
+opening up specific, necessary categories (like <code>AuthConfig</code>
+or <code>FileInfo</code>) on a strict case-by-case basis helps maintain
+a hardened server environment.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

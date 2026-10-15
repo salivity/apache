@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Configure Apache to Serve Static Files Efficiently? - apache</title>
+    <meta name="description" content="Configuring the Apache HTTP Server to deliver static assets like images, CSS, and JavaScript with optimal performance involves a combination of caching, compression, and resource optimization. By default, Apache is highly compatible but not fully optimize">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-configure-apache-to-serve-static-files-efficiently">
+    <link rel="search" type="application/opensearchdescription+xml" title="apache" href="/apache/opensearch.xml">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <link media="print" rel="stylesheet" href="/apache/css/print.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Configure Apache to Serve Static Files Efficiently? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-configure-apache-to-serve-static-files-efficiently" />
+    <meta property="og:image" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="Configuring the Apache HTTP Server to deliver static assets like images, CSS, and JavaScript with optimal performance involves a combination of caching, compression, and resource optimization. By default, Apache is highly compatible but not fully optimize" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-configure-apache-to-serve-static-files-efficiently">How
+to Configure Apache to Serve Static Files Efficiently?</h1>
+<p>Configuring the Apache HTTP Server to deliver static assets like
+images, CSS, and JavaScript with optimal performance involves a
+combination of caching, compression, and resource optimization. By
+default, Apache is highly compatible but not fully optimized for speed.
+Implementing strategies such as enabling the <code>mod_expires</code>
+module for browser caching, using <code>mod_deflate</code> for Gzip
+compression, and fine-tuning TCP settings can drastically reduce server
+load and improve website loading times for your users.</p>
+<h3 id="1-leverage-browser-caching-with-mod_expires">1. Leverage Browser
+Caching with mod_expires</h3>
+<p>Browser caching tells visitors' browsers to store static files
+locally, reducing the number of requests sent to your server on
+subsequent visits. To implement this, you need to ensure
+<code>mod_expires</code> is enabled and configure your
+<code>.htaccess</code> or virtual host file.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;IfModule</span><span class="at"> mod_expires.c</span><span class="fu">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="ex">ExpiresActive</span><span class="ch"> </span><span class="kw">On</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    ExpiresDefault<span class="st"> &quot;access plus 1 month&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    ExpiresByType<span class="st"> text/css &quot;access plus 1 year&quot;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    ExpiresByType<span class="st"> application/javascript &quot;access plus 1 year&quot;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    ExpiresByType<span class="st"> image/jpeg &quot;access plus 1 year&quot;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    ExpiresByType<span class="st"> image/png &quot;access plus 1 year&quot;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    ExpiresByType<span class="st"> image/gif &quot;access plus 1 year&quot;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    ExpiresByType<span class="st"> image/svg+xml &quot;access plus 1 year&quot;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/IfModule&gt;</span></span></code></pre></div>
+<h3 id="2-enable-gzip-compression-with-mod_deflate">2. Enable Gzip
+Compression with mod_deflate</h3>
+<p>Compressing text-based assets before sending them over the network
+significantly reduces file sizes, speeding up delivery. The
+<code>mod_deflate</code> module handles this seamlessly.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;IfModule</span><span class="at"> mod_deflate.c</span><span class="fu">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    AddOutputFilterByType<span class="st"> DEFLATE text/html text/plain text/xml text/css application/javascript application/json</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/IfModule&gt;</span></span></code></pre></div>
+<h3 id="3-disable-htaccess-files-for-better-performance">3. Disable
+.htaccess Files for Better Performance</h3>
+<p>When <code>AllowOverride All</code> is active, Apache searches every
+directory in the file path for a <code>.htaccess</code> file on every
+single request, causing significant filesystem overhead. For production
+environments, move your configurations directly into the main virtual
+host file and disable <code>.htaccess</code>.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;Directory</span><span class="at"> &quot;/var/www/html&quot;</span><span class="fu">&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="ex">AllowOverride</span><span class="ch"> </span><span class="kw">None</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    Require<span class="st"> all granted</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/Directory&gt;</span></span></code></pre></div>
+<h3 id="4-optimize-keepalive-settings">4. Optimize KeepAlive
+Settings</h3>
+<p>The <code>KeepAlive</code> directive allows the same TCP connection
+to send multiple files, which is critical for static assets. However,
+keeping connections open too long can drain server memory.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode apache"><code class="sourceCode apache"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">KeepAlive</span><span class="ch"> </span><span class="kw">On</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">MaxKeepAliveRequests</span><span class="ch"> </span><span class="fl">100</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ch">KeepAliveTimeout </span><span class="fl">2</span></span></code></pre></div>
+<p>Setting <code>KeepAliveTimeout</code> to a low number (like 2 to 5
+seconds) ensures that the connection remains open long enough to
+download the static assets for a single page view, but closes quickly
+enough to free up resources for other users.</p>
+<h3 id="5-utilize-keepalive-and-event-mpm">5. Utilize KeepAlive and
+Event MPM</h3>
+<p>Apache offers different Multi-Processing Modules (MPMs) to handle
+requests. The older <code>prefork</code> module assigns one process per
+connection, which scales poorly for static file delivery. Switching to
+the <code>event</code> MPM allows Apache to handle thousands of
+concurrent static file requests using a dedicated pool of threads,
+vastly increasing efficiency.</p></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>

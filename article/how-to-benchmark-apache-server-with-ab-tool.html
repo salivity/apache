@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Benchmark Apache Server With ab Tool? - apache</title>
+    <meta name="description" content="This article provides a quick overview and step-by-step guide on how to use the ApacheBench (ab) command-line tool to load-test and benchmark an Apache web server. You will learn how to install the tool, execute basic and advanced benchmarking commands, a">
+    <link rel="canonical" href="https://salivity.github.io/apache/article/how-to-benchmark-apache-server-with-ab-tool">
+    <link rel="search" type="application/opensearchdescription+xml" title="apache" href="/apache/opensearch.xml">
+    <link rel="icon" href="/apache/favicon.ico">
+    <link rel="stylesheet" href="/apache/css/style.css">
+    <link media="print" rel="stylesheet" href="/apache/css/print.css">
+    <script src="/apache/js/fuse.min.js"></script>
+    <script src="/apache/js/script.js"></script>
+    <script id="MathJax-script" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/4.1.3/tex-chtml.min.js" defer></script>
+    <script src="/monetize/monetize.js"></script>
+    <script src="/social/social.js"></script>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="How to Benchmark Apache Server With ab Tool? - apache" />
+    <meta property="og:url" content="https://salivity.github.io/apache/article/how-to-benchmark-apache-server-with-ab-tool" />
+    <meta property="og:image" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:secure_url" content="https://salivity.github.io/apache/images/open-graph/default.webp" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:description" content="This article provides a quick overview and step-by-step guide on how to use the ApacheBench (ab) command-line tool to load-test and benchmark an Apache web server. You will learn how to install the tool, execute basic and advanced benchmarking commands, a" />
+    <link rel="manifest" href="/apache/pwa/manifest.json" />
+</head>
+<body>
+    <header>
+        <a href="/apache/" aria-label="Go To Home Page" title="Go To Home Page" id="logo">
+            <span>salivity.github.io/</span><span>apache</span>
+        </a>
+        <nav>
+            <ul class="header-links">
+                <li><a href="/apache/search" title="Search" aria-label="Go To Search Page"><svg class="svg-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path></svg></a></li>
+                <li><a id="theme-toggle" title="Theme" href="javascript:void(0);" aria-label="Toggle Website Theme"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        
+    <div class="article-layout">
+        <aside id="profile-sidebar" class="profile-column" aria-label="Author Profile"></aside>
+        <div class="article-main-column">
+            <article><h1 id="how-to-benchmark-apache-server-with-ab-tool">How to Benchmark
+Apache Server With ab Tool?</h1>
+<p>This article provides a quick overview and step-by-step guide on how
+to use the ApacheBench (ab) command-line tool to load-test and benchmark
+an Apache web server. You will learn how to install the tool, execute
+basic and advanced benchmarking commands, and interpret the performance
+metrics from the output to optimize your server.</p>
+<hr />
+<h3 id="what-is-the-apachebench-ab-tool">What is the ApacheBench (ab)
+Tool?</h3>
+<p>The <strong>ab</strong> tool is a built-in, highly efficient
+command-line utility that comes packaged with the Apache HTTP server
+hyperlinks. It is designed to give you an immediate sense of how much
+load your current Apache installation can handle by flooding it with a
+high volume of simultaneous requests. It measures how many requests per
+second your server can fulfill, making it an essential tool for
+performance tuning.</p>
+<h3 id="installing-the-ab-tool">Installing the ab Tool</h3>
+<p>Before running a benchmark, you need to ensure the tool is installed
+on your system. If you already have Apache installed, <code>ab</code> is
+likely already available. If not, you can install it independently using
+your system's package manager.</p>
+<ul>
+<li><strong>On Ubuntu/Debian:</strong></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install apache2-utils</span></code></pre></div>
+<ul>
+<li><strong>On CentOS/RHEL:</strong></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> yum install httpd-tools</span></code></pre></div>
+<h3 id="running-your-first-benchmark">Running Your First Benchmark</h3>
+<p>The basic syntax for the <code>ab</code> command requires two main
+parameters: the total number of requests to execute (<code>-n</code>)
+and the number of concurrent requests to run at any given time
+(<code>-c</code>).</p>
+<p>Here is a standard command to send 1,000 total requests with a
+concurrency level of 50 to a target website:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ab</span> <span class="at">-n</span> 1000 <span class="at">-c</span> 50 http://your-server-ip-or-domain/</span></code></pre></div>
+<blockquote>
+<p><strong>Important Note:</strong> Always include the trailing slash
+(<code>/</code>) at the end of the URL or IP address, as the tool will
+throw an error without it. Furthermore, only benchmark servers that you
+own or have explicit permission to test, as high-concurrency benchmarks
+can mimic a DDoS attack.</p>
+</blockquote>
+<h3 id="understanding-the-benchmark-output">Understanding the Benchmark
+Output</h3>
+<p>Once the test completes, <code>ab</code> will output a detailed
+report. Focus on these key metrics to evaluate your server's health:</p>
+<ul>
+<li><strong>Requests per second:</strong> This is the most critical
+metric (also known as throughput). It tells you the average number of
+concurrent requests the server handled successfully each second. Higher
+numbers indicate better performance.</li>
+<li><strong>Time per request:</strong> This indicates the average time
+it took for a single request to be fulfilled. The output provides two
+versions of this: one for the concurrent batch and one for an individual
+request. Lower times are ideal.</li>
+<li><strong>Failed requests:</strong> If this number is anything other
+than zero, your server is dropping connections, timing out, or returning
+error codes (like 500 Internal Server Error) under the pressure.</li>
+<li><strong>Transfer rate:</strong> This shows the amount of data read
+from the server per second, which helps you identify potential network
+bandwidth bottlenecks.</li>
+</ul>
+<h3 id="advanced-benchmarking-options">Advanced Benchmarking
+Options</h3>
+<p>For deeper analysis, the <code>ab</code> tool offers several advanced
+flags:</p>
+<ul>
+<li><strong>Keep-Alive Functionality (<code>-k</code>):</strong> Enables
+the HTTP Keep-Alive feature, allowing multiple requests to be sent over
+a single TCP connection. This mimics modern browser behavior.</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ab</span> <span class="at">-n</span> 1000 <span class="at">-c</span> 50 <span class="at">-k</span> http://your-server-ip-or-domain/</span></code></pre></div>
+<ul>
+<li><strong>Exporting Data to CSV (<code>-e</code>):</strong> Saves the
+percentage of requests served within specific timeframes to a CSV file,
+which is useful for generating charts in Excel or Google Sheets.</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ab</span> <span class="at">-n</span> 1000 <span class="at">-c</span> 50 <span class="at">-e</span> benchmark_data.csv http://your-server-ip-or-domain/</span></code></pre></div></article>
+        <div id="comments-container"></div>
+        <script>
+            const utterancesScript = document.createElement('script');
+            utterancesScript.setAttribute('src', 'https://utteranc.es/client.js');
+            utterancesScript.setAttribute('repo', 'salivity/apache'); 
+            utterancesScript.setAttribute('issue-term', 'pathname'); 
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            utterancesScript.setAttribute('theme', currentTheme === 'dark' ? 'github-dark' : 'github-light'); 
+            utterancesScript.setAttribute('crossorigin', 'anonymous');
+            utterancesScript.async = true;
+            document.getElementById('comments-container').appendChild(utterancesScript);
+        </script>
+    
+        </div>
+    </div>
+    
+    </main>
+    <footer>
+        <nav>
+            <ul class="social-links">
+            </ul>
+        </nav>
+        <nav>
+            <ul class="footer-links">
+                <li><a href="https://smvc.dev/contact">Contact</a></li>
+                <li><a href="/apache/privacy-policy">Privacy Policy</a></li>
+                <li><a href="/apache/terms-and-conditions">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+        <div class="copyright">
+            Copyright &copy; <span id="current-year"></span>
+        </div>
+    </footer>
+</body>
+</html>
